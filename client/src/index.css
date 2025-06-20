@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(200, 100%, 97%);
+  --foreground: hsl(220, 14.3%, 4.1%);
+  --muted: hsl(210, 40%, 98%);
+  --muted-foreground: hsl(215, 13.8%, 44.1%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(220, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(220, 14.3%, 4.1%);
+  --border: hsl(220, 13%, 91%);
+  --input: hsl(220, 13%, 91%);
+  --primary: hsl(220, 90%, 54%);
+  --primary-foreground: hsl(210, 100%, 99%);
+  --secondary: hsl(210, 40%, 98%);
+  --secondary-foreground: hsl(222.2, 84%, 4.9%);
+  --accent: hsl(210, 40%, 98%);
+  --accent-foreground: hsl(222.2, 84%, 4.9%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --ring: hsl(220, 14.3%, 4.1%);
+  --radius: 0.5rem;
+  
+  /* Custom colors for StudyBot */
+  --primary-light: hsl(198, 100%, 88%);
+  --primary-dark: hsl(203, 89%, 33%);
+  --secondary-light: hsl(258, 100%, 96%);
+  --secondary-dark: hsl(258, 68%, 56%);
+  --accent-coral: hsl(0, 79%, 70%);
+  --accent-lime: hsl(158, 64%, 52%);
+  --neutral-100: hsl(210, 20%, 98%);
+  --neutral-200: hsl(214, 15%, 91%);
+  --neutral-600: hsl(215, 16%, 47%);
+  --neutral-800: hsl(215, 28%, 17%);
+}
+
+.dark {
+  --background: hsl(220, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(220, 3.7%, 15.9%);
+  --muted-foreground: hsl(215, 5%, 64.9%);
+  --popover: hsl(220, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(220, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(220, 3.7%, 15.9%);
+  --input: hsl(220, 3.7%, 15.9%);
+  --primary: hsl(220, 90%, 54%);
+  --primary-foreground: hsl(210, 100%, 99%);
+  --secondary: hsl(220, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(220, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(220, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-[hsl(var(--primary-light))] to-[hsl(var(--secondary-light))] font-sans antialiased text-foreground min-h-screen;
+  }
+}
+
+@layer components {
+  .glassmorphic {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+  
+  .chat-bubble-user {
+    background: linear-gradient(135deg, hsl(var(--accent-coral)), hsl(0, 79%, 75%));
+  }
+  
+  .chat-bubble-ai {
+    background: linear-gradient(135deg, hsl(var(--accent-lime)), hsl(158, 64%, 57%));
+  }
+  
+  .btn-coral {
+    @apply bg-[hsl(var(--accent-coral))] text-white hover:bg-[hsl(0,79%,65%)] transition-colors;
+  }
+  
+  .btn-lime {
+    @apply bg-[hsl(var(--accent-lime))] text-white hover:bg-[hsl(158,64%,47%)] transition-colors;
+  }
+  
+  .text-coral {
+    @apply text-[hsl(var(--accent-coral))];
+  }
+  
+  .text-lime {
+    @apply text-[hsl(var(--accent-lime))];
+  }
+  
+  .bg-coral {
+    @apply bg-[hsl(var(--accent-coral))];
+  }
+  
+  .bg-lime {
+    @apply bg-[hsl(var(--accent-lime))];
+  }
+}
