@@ -1,8 +1,8 @@
-# StudyBot - AI-Powered Learning Platform Project Plan
+# Mobius - AI-Powered Learning Platform Project Plan
 
 ## Project Overview
 
-StudyBot is a comprehensive Canvas-integrated Study Assistant that leverages AI to provide personalized learning experiences. The platform combines modern web technologies with advanced AI capabilities to help students optimize their study methods, track assignments, and master course concepts through evidence-based learning techniques.
+Mobius is a comprehensive Canvas-integrated Study Assistant that leverages AI to provide personalized learning experiences. The platform combines modern web technologies with advanced AI capabilities to help students optimize their study methods, track assignments, and master course concepts through evidence-based learning techniques.
 
 ## Current Implementation Status
 
@@ -327,10 +327,10 @@ StudyBot is a comprehensive Canvas-integrated Study Assistant that leverages AI 
 
 ## Summary
 
-StudyBot represents a comprehensive AI-powered learning platform that successfully integrates multiple educational technologies into a cohesive, user-friendly experience. The current implementation provides a solid foundation with all core features operational, requiring only the OpenAI API key to activate the AI-powered learning features.
+Mobius represents a comprehensive AI-powered learning platform that successfully integrates multiple educational technologies into a cohesive, user-friendly experience. The current implementation provides a solid foundation with all core features operational, with the OpenAI API key now activated for full AI-powered learning features.
 
 The platform is designed for scalability, maintainability, and user engagement, with a clear roadmap for future enhancements. The technical architecture supports both current needs and future growth, while the user experience prioritizes intuitive interaction and effective learning outcomes.
 
 **Last Updated**: June 20, 2025  
 **Version**: 1.0.0  
-**Status**: Production Ready (pending OpenAI API key)
+**Status**: Production Ready

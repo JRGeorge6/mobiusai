@@ -13,7 +13,7 @@ export default function Landing() {
               <div className="w-10 h-10 bg-coral rounded-xl flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-neutral-800">StudyBot</h1>
+              <h1 className="text-2xl font-bold text-neutral-800">Mobius</h1>
             </div>
             <Button onClick={() => window.location.href = '/api/login'} className="btn-coral">
               Get Started
@@ -133,7 +133,7 @@ export default function Landing() {
               <div className="w-8 h-8 bg-coral rounded-lg flex items-center justify-center">
                 <Brain className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-semibold text-neutral-800">StudyBot</span>
+              <span className="text-lg font-semibold text-neutral-800">Mobius</span>
             </div>
             <div className="flex space-x-6 text-sm text-neutral-600">
               <a href="#" className="hover:text-neutral-800 transition-colors">About</a>

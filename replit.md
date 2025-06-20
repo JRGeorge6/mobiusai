@@ -1,8 +1,8 @@
-# StudyBot - AI-Powered Learning Platform
+# Mobius - AI-Powered Learning Platform
 
 ## Overview
 
-StudyBot is a full-stack web application that integrates with Canvas LMS to provide AI-powered learning assistance. The platform offers active recall, Feynman mode learning, spaced repetition flashcards, and personalized learning assessments. Built with a modern React frontend and Express.js backend, it leverages OpenAI for content processing and Drizzle ORM with PostgreSQL for data persistence.
+Mobius is a full-stack web application that integrates with Canvas LMS to provide AI-powered learning assistance. The platform offers active recall, Feynman mode learning, spaced repetition flashcards, and personalized learning assessments. Built with a modern React frontend and Express.js backend, it leverages OpenAI for content processing and Drizzle ORM with PostgreSQL for data persistence.
 
 ## System Architecture
 
@@ -111,8 +111,10 @@ The application uses a comprehensive PostgreSQL schema with the following main e
 - `REPL_ID`: Replit environment identifier
 
 ## Changelog
-- June 20, 2025. Initial setup
+- June 20, 2025. Initial setup and full implementation
+- June 20, 2025. Application name changed from StudyBot to Mobius per user request
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Application name: Mobius (changed from StudyBot)
