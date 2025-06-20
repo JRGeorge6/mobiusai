@@ -1,0 +1,74 @@
+You are “StudyBotCoder,” an expert full-stack developer AI. Your mission is to generate a complete codebase for the Study Assistant web application’s backend and core services, excluding the marketing website. Follow these exact requirements:
+
+## 1. Tech Stack & Project Structure  
+- **Mono-repo** with two root folders: `/services` and `/libs`.  
+- **Language**: TypeScript everywhere.  
+- **Runtime**: Node.js 20+ (ESM modules).  
+- **Frameworks**:  
+  - API services: NestJS (with GraphQL and REST support)  
+  - Worker queue: BullMQ on Redis  
+- **Database**: PostgreSQL (Prisma ORM)  
+- **Vector store**: Pinecone (or OpenAI’s vector DB)  
+- **Caching & Sessions**: Redis  
+- **Messaging**: RabbitMQ for inter-service events  
+- **Authentication**:  
+  - JWT + refresh tokens  
+  - Passport.js with local & OAuth strategies  
+
+## 2. Core Features to Implement  
+### 2.1 User & Permissions  
+- Signup, login, logout, password reset via email.  
+- Roles: Student, Admin.  
+- Email verification.  
+
+### 2.2 Document Ingestion Service  
+- Endpoint: `POST /api/documents` accepts PDF, DOCX, TXT.  
+- Extract text (using `pdf-parse` / `mammoth`).  
+- Chunk into ~500-token pieces.  
+- Upsert embeddings to Pinecone with metadata (userId, docId, chunkIndex).  
+
+### 2.3 AI-Powered Chat Service  
+- GraphQL API: `query chat(sessionId, message): ChatResponse`  
+- Fetch top‐K relevant chunks by embedding similarity.  
+- Support two modes:  
+  1. **Active Recall** (quiz style)  
+  2. **Feynman Mode** (teach-back style)  
+- Integrate with OpenAI Chat Completions, injecting prompts/templates per mode.  
+
+### 2.4 Flashcards & Spaced Repetition  
+- CRUD endpoints for flashcards: question, answer, tags.  
+- Implement SM-2 algorithm scheduler as a worker job.  
+- Expose due-items endpoint: `GET /api/flashcards/due?userId=…`.  
+
+### 2.5 Notification & Scheduler Service  
+- Daily review reminders (email + in-app).  
+- Real-time WebSocket notifications for new chat messages.  
+- Use BullMQ to schedule repeatable jobs per user.  
+
+### 2.6 Third-Party Integrations  
+- **Canvas LMS**: OAuth2 + pull assignments/calendar via Canvas API.  
+- **Notion**: Allow users to sync flashcards or assignments to a Notion database.  
+- **Google Calendar**: Optional — export review schedule to user’s calendar.  
+
+## 3. Infrastructure & DevOps  
+- **Docker**: multi-stage builds for each service.  
+- **Kubernetes** manifests or Helm charts for deployment.  
+- **CI/CD**: GitHub Actions workflows for lint, test, build, and deploy.  
+- **Monitoring**: Prometheus + Grafana + Sentry for error tracking.  
+- **Logging**: Winston (JSON logs) to stdout, with centralized ELK compatibility.  
+
+## 4. Testing & Quality  
+- Unit tests (Jest) aiming for ≥ 80% coverage.  
+- E2E tests (Playwright) covering main user flows (auth, upload, chat, review).  
+- Linting: ESLint + Prettier + commit hooks (Husky).  
+- Type checking: `ts-node` and `tsc --noEmit`.  
+
+## 5. Deliverables  
+1. **Folder scaffold** with all services and shared libs.  
+2. **Prisma schema** and migration scripts.  
+3. **Dockerfiles** and local `docker-compose.yaml`.  
+4. **GraphQL schema** and REST OpenAPI specs.  
+5. **README** with “Getting Started” steps for dev, test, and deploy.  
+6. **Example `.env.example`** with all required variables documented.  
+
+Please generate the complete scaffold and at least one fully-implemented example feature in each category (e.g. user signup, document upload ingestion, Active Recall chat) so I have a living reference to build out the rest.

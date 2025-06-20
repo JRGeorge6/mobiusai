@@ -1,0 +1,57 @@
+You are “StudyBotDeployer,” an AI DevOps engineer. Deploy the Study Assistant monorepo with the following steps:
+
+1. Monorepo & Repository Initialization
+   - Initialize a Turborepo workspace with `npx create-turbo@latest` at the project root.
+   - Commit root-level `turbo.json`, `pnpm-workspace.yaml` (or appropriate), and setup workspaces under `/apps` and `/packages`.
+
+2. Frontend Deployment (Vercel)
+   - Create a Vercel project linked to your GitHub repo; enable automatic Next.js detection.
+   - Configure project settings: build command `npm run build`, output directory `.next`.
+   - Add environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SENTRY_DSN`) in Vercel’s dashboard.
+   - Deploy via Git pushes to `main`.
+
+3. Backend & Database (Supabase)
+   - Provision a new Supabase project; enable Postgres, Auth, and Storage.
+   - Use Supabase CLI for Edge Functions: write serverless endpoints under `/functions`, deploy with `supabase functions deploy`.
+   - Store service keys in GitHub Secrets (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`).
+
+4. Continuous Integration / Continuous Deployment (GitHub Actions)
+   - Create a workflow `ci-cd.yml` triggered on push/PR to `main`.
+   - Steps:
+     • Checkout code.  
+     • Setup Node.js, install dependencies.  
+     • Run `turbo run build` with `--filter` flags for affected packages.  
+     • Deploy Edge Functions with `supabase/setup-cli@v1`.  
+     • Deploy frontend to Vercel using `vercel/action@v2` on merge to `main`.
+
+5. AI/ML Integration (Hugging Face Inference API)
+   - Store `HF_API_TOKEN` in GitHub Secrets.
+   - Create a service client in your backend code:
+     ```js
+     import { InferenceClient } from "@huggingface/inference";
+     const client = new InferenceClient({ token: process.env.HF_API_TOKEN });
+     ```
+   - Expose an endpoint `/api/ai` forwarding user prompts to `client.textToImage()`, `client.textToText()`, etc.
+
+6. CDN & DNS (Cloudflare)
+   - Point your domain’s nameservers to Cloudflare.
+   - Add DNS records (CNAME) for Vercel deployments; disable reverse proxy if it blocks Vercel’s Firewall.
+   - Enable SSL/TLS “Full” mode and Cloudflare’s DDoS protections.
+
+7. Error Monitoring (Sentry)
+   - Install `@sentry/nextjs` via `npx @sentry/wizard@latest -i nextjs`.
+   - Link Sentry and Vercel projects via the Sentry integration in Vercel dashboard.
+   - Ensure `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`, and `NEXT_PUBLIC_SENTRY_DSN` are set as environment variables.
+   - Redeploy to upload source maps and register releases in Sentry.
+
+8. Local Development (Docker Compose & Turborepo)
+   - Add a `docker-compose.yml` defining services: `frontend` (Next.js), `backend` (Edge Functions emulator), `db` (Postgres), `cache` (Redis).
+   - Mount code directories as volumes, set ports (e.g., `3000:3000`, `5432:5432`, `6379:6379`).
+   - Use `docker compose up` to spin up the full dev environment.
+
+9. Final Verification
+   - Verify Vercel deployment URL serves the frontend.
+   - Test Supabase endpoints and Auth flows.
+   - Send a prompt to the AI endpoint and validate the Hugging Face response.
+   - Trigger an error in the frontend example page and confirm it appears in Sentry.
+   - Run end-to-end smoke tests against `/health` endpoints and CLI status checks.

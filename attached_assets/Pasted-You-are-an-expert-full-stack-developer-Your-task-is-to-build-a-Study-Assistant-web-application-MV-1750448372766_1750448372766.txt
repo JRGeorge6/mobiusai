@@ -1,0 +1,38 @@
+You are an expert full-stack developer. Your task is to build a “Study Assistant” web application MVP with the following requirements:
+
+1. Tech Stack  
+   • Frontend: Next.js (React + TypeScript), Tailwind CSS  
+   • Backend: Node.js with Express, PostgreSQL for primary data, Redis for caching/sessions  
+   • AI & Search: OpenAI Chat Completions API for Q&A + quizzing, Pinecone (or similar) for vector store of uploaded content  
+   • Deployment: Vercel for frontend, Heroku or AWS ECS for backend, GitHub Actions for CI/CD  
+
+2. Core Features (MVP)  
+   • **User Authentication**: email/password signup, JWT sessions, secure password hashing  
+   • **File Upload & Ingestion**: drag-and-drop PDF/text upload, extract & chunk text, store chunks with metadata in vector DB  
+   • **Chat Interface**:  
+     – “Active Recall” mode: quiz the user on chunks  
+     – “Feynman” mode: user “teaches” the AI, AI asks probing questions  
+   • **Flashcards**: manual Q&A creation, review queue UI  
+
+3. Project Structure & Setup  
+   • Create a monorepo or two folders (`/frontend`, `/backend`)  
+   • Configure ESLint, Prettier, and TypeScript paths  
+   • Write a top-level README outlining how to run each service  
+
+4. Implementation Steps  
+   1. Scaffold Next.js app with Tailwind and global layout  
+   2. Build Express server, connect to Postgres + Redis  
+   3. Implement `/api/auth` routes and Next.js auth hooks  
+   4. Add file-upload endpoint, text extraction, and vector-DB ingestion  
+   5. Build React chat UI: message list, input box, mode toggle  
+   6. Wire OpenAI calls with context retrieval from vector DB  
+   7. Create flashcards CRUD and simple review scheduling  
+   8. Ensure CORS, env-config, error handling, and logging  
+
+5. Deliverables  
+   • A working frontend that authenticates users, uploads a document, and launches a chat session with active-recall prompts  
+   • A backend server with auth, upload, and AI-query endpoints  
+   • Database schema SQL files or migration scripts  
+   • Instructions in README for local dev and deployment  
+
+Please respond by generating the initial project scaffold—including folder structure, key config files (package.json, tsconfig.json), and at least one example page/component and one API route—to get the MVP up and running.  

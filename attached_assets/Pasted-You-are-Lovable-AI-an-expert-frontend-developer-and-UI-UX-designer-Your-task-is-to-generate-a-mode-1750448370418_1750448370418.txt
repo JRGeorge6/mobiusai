@@ -1,0 +1,48 @@
+You are Lovable AI, an expert frontend developer and UI/UX designer. Your task is to generate a modern, inviting website for a Study Assistant app that radiates positive energy and encourages learning. Follow these guidelines:
+
+1. **Overall Aesthetic**  
+   - Use a pastel gradient palette (e.g., soft blues to purples) as the primary background.  
+   - Incorporate vibrant accent color (e.g., coral or lime) for call-to-action buttons.  
+   - Opt for clean, geometric sans-serif fonts for headings and a highly readable sans-serif for body text.  
+   - Employ friendly, rounded shapes and glassmorphic panels with subtle drop shadows.
+
+2. **Layout & Sections**  
+   - **Hero Section**:  
+     • Full-viewport gradient background.  
+     • Bold headline: “Unlock Your Learning Potential.”  
+     • Subheadline: “Active Recall, Feynman Mode, and Spaced Repetition—all in one place.”  
+     • Primary CTA button: “Get Started Free.”  
+     • Supportive SVG or Lottie illustration showing students interacting with a chat interface.  
+   - **Features Section**:  
+     • 4-column grid of feature cards (Active Recall, Feynman Mode, Spaced Repetition, Interleaved Study).  
+     • Each card: rounded corners, icon atop title, 2–3 line description.  
+   - **Interactive Demo**:  
+     • Embedded mockup of the chat UI quizzing the user.  
+     • Subtle hover and scroll animations (fade-in, slide-up).  
+   - **Flashcards Preview**:  
+     • Horizontal carousel of flashcards showing question/answer flip.  
+     • Progress indicator beneath cards.  
+   - **Testimonials**:  
+     • 2–3 user quotes with circular avatar images and names.  
+   - **Footer**:  
+     • Links: About, Docs, Contact, Privacy.  
+     • Social icons with hover color shifts.
+
+3. **Styling & Interactions**  
+   - Build with Tailwind CSS utility classes in a component-based structure.  
+   - Define a custom color palette in the Tailwind config.  
+   - Add micro-interactions: button hover scaling, input focus glows, card elevates on hover.  
+   - Ensure responsive design: single-column on mobile, multi-column on tablet/desktop.
+
+4. **Accessibility**  
+   - Provide meaningful alt text for images/SVGs.  
+   - Ensure sufficient contrast ratios for text over gradient backgrounds.  
+   - Include visible keyboard focus states for interactive elements.
+
+5. **Deliverables**  
+   1. **Design Spec**: A Figma-ready JSON layout of the landing page wireframe.  
+   2. **Code Scaffold**: A Next.js `index.tsx` page with React components and Tailwind styling.  
+   3. **Tailwind Config**: Snippet showing custom colors and typography.  
+   4. **Asset Placeholders**: Reference SVG or Lottie files with descriptive filenames.
+
+Produce the above in a single, cohesive response so I can hand it directly to my development team.
