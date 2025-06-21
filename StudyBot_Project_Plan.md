@@ -16,9 +16,10 @@ Mobius is a comprehensive Canvas-integrated Study Assistant that leverages AI to
 
 #### 2. Database Architecture
 - **PostgreSQL Database**: Fully configured with Drizzle ORM
-- **Comprehensive Schema**: 10 interconnected tables supporting all features
+- **Comprehensive Schema**: 12 interconnected tables supporting all features
   - Users, Courses, Assignments, Documents, Concepts
   - Flashcards, Learning Assessments, Chat Sessions, Concept Progress
+  - Interleaved Sessions, Interleaved Questions
   - Session storage for authentication
 - **Type Safety**: Complete TypeScript integration with Zod validation
 
@@ -33,11 +34,13 @@ Mobius is a comprehensive Canvas-integrated Study Assistant that leverages AI to
 - **Document Processing**: Multi-format support (PDF, DOCX, TXT)
 - **Concept Extraction**: Automatic identification of learning concepts from materials
 - **Content Chunking**: Intelligent text segmentation for AI processing
+- **Answer Evaluation**: AI-powered answer checking for interleaved studying
 
 #### 5. Learning Features
 - **Active Recall Mode**: AI-generated questions from course materials
 - **Feynman Method**: Conversational teaching simulation
 - **Spaced Repetition**: SM-2 algorithm implementation for flashcards
+- **Interleaved Studying**: Mixed topic sessions with AI-generated questions
 - **Learning Style Assessment**: Multi-modal testing with radar chart visualization
 
 #### 6. User Interface
@@ -85,7 +88,19 @@ Mobius is a comprehensive Canvas-integrated Study Assistant that leverages AI to
    - Due card prioritization
    - Performance analytics
 
-6. **Learning Assessment** (`/assessment`)
+6. **Interleaved Studying** (`/interleaved`)
+   - Session creation with concept selection
+   - Mixed topic question generation
+   - Progress tracking and analytics
+   - Session completion management
+
+7. **Interleaved Session** (`/interleaved/:sessionId`)
+   - Interactive question answering interface
+   - Multiple question types (MCQ, short answer, true/false)
+   - Real-time feedback and explanations
+   - Session statistics and timing
+
+8. **Learning Assessment** (`/assessment`)
    - Multi-modal learning style evaluation
    - Visual, auditory, kinesthetic, reading, social, logical testing
    - Radar chart visualization of results
@@ -117,6 +132,15 @@ Mobius is a comprehensive Canvas-integrated Study Assistant that leverages AI to
 - **Difficulty Adjustment**: Cards adapt based on recall success
 - **Optimal Scheduling**: Due dates calculated for maximum retention
 - **Performance Analytics**: Detailed progress tracking
+
+#### Interleaved Studying System
+- **Mixed Topic Sessions**: Combines multiple concepts in single study sessions
+- **Question Variety**: Multiple choice, short answer, and true/false questions
+- **AI-Generated Content**: Questions created from user's course materials
+- **Progress Tracking**: Real-time analytics and session completion
+- **Difficulty Levels**: Easy, medium, and hard session options
+- **Concept Selection**: User chooses 2+ concepts to interleave
+- **Shuffled Order**: Questions mixed to prevent pattern recognition
 
 #### Learning Style Assessment
 - **Multi-Modal Testing**: 
@@ -167,13 +191,16 @@ Mobius is a comprehensive Canvas-integrated Study Assistant that leverages AI to
 8. **flashcards**: Spaced repetition cards with SM-2 data
 9. **learning_assessments**: Learning style evaluation results
 10. **chat_sessions**: Conversational learning history
+11. **interleaved_sessions**: Mixed topic study sessions
+12. **interleaved_questions**: Questions for interleaved sessions
 
 #### Relationship Model
-- Users have many courses, assignments, documents, flashcards
+- Users have many courses, assignments, documents, flashcards, interleaved sessions
 - Courses contain assignments, documents, and concepts
-- Documents generate concepts which create flashcards
+- Documents generate concepts which create flashcards and interleaved questions
 - Concept progress tracks individual mastery
 - Chat sessions maintain conversation context
+- Interleaved sessions contain multiple concepts and questions
 
 ### 🚀 Deployment Strategy
 

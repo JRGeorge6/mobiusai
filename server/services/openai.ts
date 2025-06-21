@@ -26,6 +26,13 @@ export interface QuizQuestion {
   explanation: string;
 }
 
+export interface InterleavedQuestion {
+  question: string;
+  answer: string;
+  type: 'multiple_choice' | 'short_answer' | 'true_false';
+  options?: string[];
+}
+
 export class OpenAIService {
   async extractConcepts(text: string, courseTitle: string): Promise<ConceptExtractionResult> {
     try {
@@ -133,6 +140,74 @@ export class OpenAIService {
         question: `What is ${concept}?`,
         answer: "No answer generated"
       };
+    }
+  }
+
+  async generateInterleavedQuestions(concept: any, difficulty: string, count: number): Promise<InterleavedQuestion[]> {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `Generate ${count} diverse questions for interleaved studying about the concept "${concept.title}". 
+            Mix question types: multiple choice, short answer, and true/false. 
+            Difficulty: ${difficulty}. 
+            Return JSON array: [{ "question": string, "answer": string, "type": "multiple_choice"|"short_answer"|"true_false", "options": string[] (for multiple choice only) }]`
+          },
+          {
+            role: "user",
+            content: `Concept: ${concept.title}\nDescription: ${concept.description}\nTags: ${concept.tags?.join(', ') || 'none'}`
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '[]');
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Error generating interleaved questions:', error);
+      // Fallback questions
+      return [
+        {
+          question: `What is ${concept.title}?`,
+          answer: concept.description || "A key concept in the course",
+          type: "short_answer" as const
+        },
+        {
+          question: `True or False: ${concept.title} is an important concept to understand.`,
+          answer: "true",
+          type: "true_false" as const
+        }
+      ];
+    }
+  }
+
+  async checkAnswer(question: string, correctAnswer: string, userAnswer: string): Promise<boolean> {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are an AI tutor evaluating student answers. Compare the user's answer with the correct answer. Be flexible with wording but strict with accuracy. Return only 'true' if the answer is correct, 'false' otherwise."
+          },
+          {
+            role: "user",
+            content: `Question: ${question}\nCorrect Answer: ${correctAnswer}\nUser Answer: ${userAnswer}\n\nIs the user's answer correct? Respond with only 'true' or 'false'.`
+          }
+        ],
+        temperature: 0.1,
+        max_tokens: 10,
+      });
+
+      const result = response.choices[0].message.content?.toLowerCase().trim();
+      return result === 'true';
+    } catch (error) {
+      console.error('Error checking answer:', error);
+      // Fallback to simple string comparison
+      return userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
     }
   }
 

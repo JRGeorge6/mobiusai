@@ -1,6 +1,7 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, BookOpen, Zap, Target, Users, TrendingUp } from "lucide-react";
+import { Brain, BookOpen, Zap, Target, Users, TrendingUp, RotateCcw } from "lucide-react";
 
 export default function Landing() {
   return (
@@ -29,7 +30,7 @@ export default function Landing() {
             Unlock Your Learning Potential
           </h1>
           <p className="text-xl text-neutral-600 mb-8 max-w-2xl mx-auto">
-            Active Recall, Feynman Mode, and Spaced Repetition—all in one place.
+            Active Recall, Feynman Mode, Spaced Repetition, and Interleaved Studying—all in one place.
             Connect with Canvas and let AI transform your study experience.
           </p>
           <Button
@@ -48,7 +49,7 @@ export default function Landing() {
           <h2 className="text-3xl font-bold text-center text-neutral-800 mb-12">
             Powerful Learning Features
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="glassmorphic hover-lift border-0">
               <CardContent className="p-6 text-center">
                 <div className="w-16 h-16 bg-coral/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -88,11 +89,35 @@ export default function Landing() {
             <Card className="glassmorphic hover-lift border-0">
               <CardContent className="p-6 text-center">
                 <div className="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-8 h-8 text-purple-500" />
+                  <RotateCcw className="w-8 h-8 text-purple-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-neutral-800 mb-2">Interleaved Studying</h3>
+                <p className="text-sm text-neutral-600">
+                  Mix different topics within a single session to improve long-term retention and knowledge transfer.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="glassmorphic hover-lift border-0">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-green-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-8 h-8 text-green-500" />
                 </div>
                 <h3 className="text-lg font-semibold text-neutral-800 mb-2">Adaptive Learning</h3>
                 <p className="text-sm text-neutral-600">
                   Personalized study recommendations based on your learning style assessment.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="glassmorphic hover-lift border-0">
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Brain className="w-8 h-8 text-orange-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-neutral-800 mb-2">AI-Powered</h3>
+                <p className="text-sm text-neutral-600">
+                  Advanced AI analyzes your materials and creates personalized learning experiences.
                 </p>
               </CardContent>
             </Card>

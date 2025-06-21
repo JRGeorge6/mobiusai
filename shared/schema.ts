@@ -147,11 +147,46 @@ export const chatSessions = pgTable("chat_sessions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id),
   courseId: integer("course_id").references(() => courses.id),
-  mode: varchar("mode").notNull(), // active_recall, feynman
+  mode: varchar("mode").notNull(), // active_recall, feynman, interleaved
   title: text("title"),
   messages: jsonb("messages"), // Array of chat messages
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Interleaved study sessions
+export const interleavedSessions = pgTable("interleaved_sessions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  concepts: jsonb("concepts").notNull(), // Array of concept IDs to interleave
+  currentConceptIndex: integer("current_concept_index").default(0),
+  totalQuestions: integer("total_questions").default(0),
+  questionsAnswered: integer("questions_answered").default(0),
+  correctAnswers: integer("correct_answers").default(0),
+  sessionDuration: integer("session_duration"), // in minutes
+  difficulty: varchar("difficulty").default("medium"), // easy, medium, hard
+  isActive: boolean("is_active").default(true),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Interleaved study questions
+export const interleavedQuestions = pgTable("interleaved_questions", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").references(() => interleavedSessions.id),
+  conceptId: integer("concept_id").references(() => concepts.id),
+  question: text("question").notNull(),
+  answer: text("answer").notNull(),
+  questionType: varchar("question_type").notNull(), // multiple_choice, short_answer, true_false
+  options: jsonb("options"), // For multiple choice questions
+  userAnswer: text("user_answer"),
+  isCorrect: boolean("is_correct"),
+  timeSpent: integer("time_spent"), // in seconds
+  orderInSession: integer("order_in_session").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Relations
@@ -164,6 +199,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   flashcards: many(flashcards),
   learningAssessments: many(learningAssessments),
   chatSessions: many(chatSessions),
+  interleavedSessions: many(interleavedSessions),
 }));
 
 export const coursesRelations = relations(courses, ({ one, many }) => ({
@@ -262,6 +298,25 @@ export const chatSessionsRelations = relations(chatSessions, ({ one }) => ({
   }),
 }));
 
+export const interleavedSessionsRelations = relations(interleavedSessions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [interleavedSessions.userId],
+    references: [users.id],
+  }),
+  questions: many(interleavedQuestions),
+}));
+
+export const interleavedQuestionsRelations = relations(interleavedQuestions, ({ one }) => ({
+  session: one(interleavedSessions, {
+    fields: [interleavedQuestions.sessionId],
+    references: [interleavedSessions.id],
+  }),
+  concept: one(concepts, {
+    fields: [interleavedQuestions.conceptId],
+    references: [concepts.id],
+  }),
+}));
+
 // Insert schemas
 export const insertCourseSchema = createInsertSchema(courses).omit({
   id: true,
@@ -308,6 +363,17 @@ export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({
   updatedAt: true,
 });
 
+export const insertInterleavedSessionSchema = createInsertSchema(interleavedSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInterleavedQuestionSchema = createInsertSchema(interleavedQuestions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -327,3 +393,7 @@ export type LearningAssessment = typeof learningAssessments.$inferSelect;
 export type InsertLearningAssessment = z.infer<typeof insertLearningAssessmentSchema>;
 export type ChatSession = typeof chatSessions.$inferSelect;
 export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;
+export type InterleavedSession = typeof interleavedSessions.$inferSelect;
+export type InsertInterleavedSession = z.infer<typeof insertInterleavedSessionSchema>;
+export type InterleavedQuestion = typeof interleavedQuestions.$inferSelect;
+export type InsertInterleavedQuestion = z.infer<typeof insertInterleavedQuestionSchema>;

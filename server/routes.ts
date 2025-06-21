@@ -7,6 +7,8 @@ import { setupSimpleAuth, isAuthenticated } from "./simpleAuth";
 import { canvasService } from "./services/canvas";
 import { openaiService } from "./services/openai";
 import { documentProcessor } from "./services/documentProcessor";
+import rateLimit from "express-rate-limit";
+import { config, getSensitiveOperationRateLimit, getOpenAIRateLimit } from "./config";
 import { 
   insertCourseSchema,
   insertAssignmentSchema,
@@ -15,14 +17,17 @@ import {
   insertConceptProgressSchema,
   insertFlashcardSchema,
   insertLearningAssessmentSchema,
-  insertChatSessionSchema
+  insertChatSessionSchema,
+  insertInterleavedSessionSchema,
+  insertInterleavedQuestionSchema
 } from "@shared/schema";
+import { z } from "zod";
 
-// Configure multer for file uploads
+// Configure multer for file uploads with enhanced security
 const upload = multer({
-  dest: 'uploads/',
+  dest: config.UPLOAD_PATH,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: config.MAX_FILE_SIZE,
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
@@ -39,6 +44,35 @@ const upload = multer({
   }
 });
 
+// Rate limiting for sensitive operations
+const sensitiveOperationLimiter = rateLimit(getSensitiveOperationRateLimit());
+
+const openaiLimiter = rateLimit(getOpenAIRateLimit());
+
+// Input validation schemas
+const conceptProgressSchema = z.object({
+  status: z.enum(['study', 'known', 'reviewing']),
+  confidence: z.number().min(1).max(5).optional(),
+});
+
+const flashcardUpdateSchema = z.object({
+  quality: z.number().min(0).max(5),
+});
+
+const chatMessageSchema = z.object({
+  message: z.string().min(1).max(1000),
+  mode: z.enum(['active_recall', 'feynman', 'interleaved']),
+  courseId: z.string().optional(),
+  sessionId: z.number().optional(),
+});
+
+const interleavedSessionSchema = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
+  concepts: z.array(z.number()).min(2).max(10),
+  difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupSimpleAuth(app);
@@ -47,7 +81,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const user = req.user;
-      res.json(user);
+      // Don't expose sensitive fields like tokens
+      const { canvasAccessToken, canvasRefreshToken, canvasTokenExpiry, ...safeUser } = user;
+      res.json(safeUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -130,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Document upload and processing
+  // Document upload and processing with enhanced security
   app.post('/api/documents', isAuthenticated, upload.single('document'), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -139,6 +175,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!file) {
         return res.status(400).json({ message: "No file provided" });
+      }
+
+      // Validate courseId if provided
+      if (courseId) {
+        const courses = await storage.getCoursesByUserId(userId);
+        const course = courses.find(c => c.id === parseInt(courseId));
+        if (!course) {
+          return res.status(400).json({ message: "Invalid course ID" });
+        }
       }
 
       // Process the document
@@ -203,6 +248,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let documents;
       if (courseId) {
+        // Verify user owns the course
+        const courses = await storage.getCoursesByUserId(userId);
+        const course = courses.find(c => c.id === parseInt(courseId));
+        if (!course) {
+          return res.status(403).json({ message: "Access denied" });
+        }
         documents = await storage.getDocumentsByCourseId(parseInt(courseId));
       } else {
         documents = await storage.getDocumentsByUserId(userId);
@@ -215,13 +266,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Concept routes
+  // Concept routes with authorization
   app.get('/api/concepts', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.claims.sub;
       const { courseId } = req.query;
       
       if (!courseId) {
         return res.status(400).json({ message: "Course ID is required" });
+      }
+      
+      // Verify user owns the course
+      const courses = await storage.getCoursesByUserId(userId);
+      const course = courses.find(c => c.id === parseInt(courseId));
+      if (!course) {
+        return res.status(403).json({ message: "Access denied" });
       }
       
       const concepts = await storage.getConceptsByCourseId(parseInt(courseId));
@@ -236,13 +295,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const conceptId = parseInt(req.params.id);
-      const { status, confidence } = req.body;
+      
+      if (!conceptId || isNaN(conceptId)) {
+        return res.status(400).json({ message: "Invalid concept ID" });
+      }
+      
+      // Validate input
+      const validatedData = conceptProgressSchema.parse(req.body);
+      
+      // Verify concept exists and user has access
+      const concepts = await storage.getConceptsByUserId(userId);
+      const concept = concepts.find(c => c.id === conceptId);
+      if (!concept) {
+        return res.status(404).json({ message: "Concept not found" });
+      }
 
       const progressData = insertConceptProgressSchema.parse({
         userId,
         conceptId,
-        status,
-        confidence,
+        ...validatedData,
         lastReviewed: new Date(),
       });
 
@@ -254,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Flashcard routes
+  // Flashcard routes with authorization
   app.get('/api/flashcards', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -293,18 +364,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/flashcards/:id', isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.claims.sub;
       const flashcardId = parseInt(req.params.id);
-      const { quality } = req.body; // SM-2 quality rating (0-5)
-
-      // Calculate next review date using SM-2 algorithm
-      const flashcard = await storage.getFlashcardsByUserId(req.user.claims.sub);
-      const current = flashcard.find(f => f.id === flashcardId);
+      
+      if (!flashcardId || isNaN(flashcardId)) {
+        return res.status(400).json({ message: "Invalid flashcard ID" });
+      }
+      
+      // Validate input
+      const validatedData = flashcardUpdateSchema.parse(req.body);
+      
+      // Verify flashcard exists and user owns it
+      const flashcards = await storage.getFlashcardsByUserId(userId);
+      const current = flashcards.find(f => f.id === flashcardId);
       
       if (!current) {
         return res.status(404).json({ message: "Flashcard not found" });
       }
 
-      const sm2Result = calculateSM2(quality, current);
+      const sm2Result = calculateSM2(validatedData.quality, current);
       const nextReview = new Date();
       nextReview.setDate(nextReview.getDate() + sm2Result.interval);
 
@@ -325,7 +403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Learning assessment routes
-  app.post('/api/assessment', isAuthenticated, async (req: any, res) => {
+  app.post('/api/assessment', isAuthenticated, openaiLimiter, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const responses = req.body;
@@ -357,16 +435,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat routes
-  app.post('/api/chat', isAuthenticated, async (req: any, res) => {
+  // Chat routes with rate limiting
+  app.post('/api/chat', isAuthenticated, openaiLimiter, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { message, mode, courseId, sessionId } = req.body;
+      
+      // Validate input
+      const validatedData = chatMessageSchema.parse(req.body);
+      const { message, mode, courseId, sessionId } = validatedData;
 
       let chatSession;
       if (sessionId) {
         const sessions = await storage.getChatSessionsByUserId(userId);
         chatSession = sessions.find(s => s.id === sessionId);
+        if (!chatSession) {
+          return res.status(404).json({ message: "Chat session not found" });
+        }
       }
 
       if (!chatSession) {
@@ -419,8 +503,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sync Canvas data
-  app.post('/api/canvas/sync', isAuthenticated, async (req: any, res) => {
+  // Sync Canvas data with rate limiting
+  app.post('/api/canvas/sync', isAuthenticated, sensitiveOperationLimiter, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -436,6 +520,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to sync Canvas data" });
     }
   });
+
+  // Interleaved Study Session routes with enhanced security
+  app.post('/api/interleaved-sessions', isAuthenticated, openaiLimiter, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Validate input
+      const validatedData = interleavedSessionSchema.parse(req.body);
+      const { title, description, concepts, difficulty } = validatedData;
+
+      // Validate concepts exist and belong to user
+      const userConcepts = await storage.getConceptsByUserId(userId);
+      const validConcepts = concepts.filter((id: number) => 
+        userConcepts.some(c => c.id === id)
+      );
+
+      if (validConcepts.length < 2) {
+        return res.status(400).json({ message: "Invalid concepts provided" });
+      }
+
+      // Create interleaved session
+      const sessionData = insertInterleavedSessionSchema.parse({
+        userId,
+        title,
+        description,
+        concepts: validConcepts,
+        difficulty,
+        totalQuestions: validConcepts.length * 5, // 5 questions per concept
+      });
+
+      const session = await storage.createInterleavedSession(sessionData);
+
+      // Generate questions for each concept
+      const questions = [];
+      for (const conceptId of validConcepts) {
+        const concept = userConcepts.find(c => c.id === conceptId);
+        if (concept) {
+          const conceptQuestions = await openaiService.generateInterleavedQuestions(
+            concept,
+            difficulty,
+            5 // 5 questions per concept
+          );
+
+          for (let i = 0; i < conceptQuestions.length; i++) {
+            const questionData = insertInterleavedQuestionSchema.parse({
+              sessionId: session.id,
+              conceptId,
+              question: conceptQuestions[i].question,
+              answer: conceptQuestions[i].answer,
+              questionType: conceptQuestions[i].type,
+              options: conceptQuestions[i].options,
+              orderInSession: questions.length + i,
+            });
+            questions.push(await storage.createInterleavedQuestion(questionData));
+          }
+        }
+      }
+
+      // Shuffle questions to create interleaved order
+      const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+      
+      // Update question order
+      for (let i = 0; i < shuffledQuestions.length; i++) {
+        await storage.updateInterleavedQuestionOrder(shuffledQuestions[i].id, i);
+      }
+
+      res.json(session);
+    } catch (error) {
+      console.error("Error creating interleaved session:", error);
+      res.status(500).json({ message: "Failed to create interleaved session" });
+    }
+  });
+
+  app.get('/api/interleaved-sessions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const sessions = await storage.getInterleavedSessionsByUserId(userId);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching interleaved sessions:", error);
+      res.status(500).json({ message: "Failed to fetch interleaved sessions" });
+    }
+  });
+
+  app.get('/api/interleaved-sessions/:sessionId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      if (!req.params.sessionId || isNaN(Number(req.params.sessionId))) {
+        return res.status(400).json({ message: "Invalid sessionId" });
+      }
+      const sessionId = parseInt(req.params.sessionId);
+      
+      const session = await storage.getInterleavedSessionById(sessionId);
+      if (!session || session.userId !== userId) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching interleaved session:", error);
+      res.status(500).json({ message: "Failed to fetch interleaved session" });
+    }
+  });
+
+  app.get('/api/interleaved-sessions/:sessionId/questions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      if (!req.params.sessionId || isNaN(Number(req.params.sessionId))) {
+        return res.status(400).json({ message: "Invalid sessionId" });
+      }
+      const sessionId = parseInt(req.params.sessionId);
+      
+      const session = await storage.getInterleavedSessionById(sessionId);
+      if (!session || session.userId !== userId) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      const questions = await storage.getInterleavedQuestionsBySessionId(sessionId);
+      const concepts = await storage.getConceptsByUserId(userId);
+      
+      // Add concept titles to questions
+      const questionsWithConcepts = questions.map(q => ({
+        ...q,
+        conceptTitle: concepts.find(c => c.id === q.conceptId)?.title || "Unknown Concept"
+      }));
+
+      res.json(questionsWithConcepts);
+    } catch (error) {
+      console.error("Error fetching interleaved questions:", error);
+      res.status(500).json({ message: "Failed to fetch interleaved questions" });
+    }
+  });
+
+  app.post('/api/interleaved-questions/:questionId/answer', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      if (!req.params.questionId || isNaN(Number(req.params.questionId))) {
+        return res.status(400).json({ message: "Invalid questionId" });
+      }
+      const questionId = parseInt(req.params.questionId);
+      const { answer, timeSpent } = req.body;
+
+      const question = await storage.getInterleavedQuestionById(questionId);
+      if (!question) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+
+      // Verify user owns the session
+      const session = await storage.getInterleavedSessionById(question.sessionId);
+      if (!session || session.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Check if answer is correct
+      const isCorrect = await openaiService.checkAnswer(question.question, question.answer, answer);
+
+      // Update question with user's answer
+      await storage.updateInterleavedQuestionAnswer(questionId, answer, isCorrect, timeSpent);
+
+      // Update session progress
+      await storage.updateInterleavedSessionProgress(question.sessionId);
+
+      res.json({ isCorrect, correctAnswer: question.answer });
+    } catch (error) {
+      console.error("Error submitting answer:", error);
+      res.status(500).json({ message: "Failed to submit answer" });
+    }
+  });
+
+  app.post('/api/interleaved-sessions/:sessionId/complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      if (!req.params.sessionId || isNaN(Number(req.params.sessionId))) {
+        return res.status(400).json({ message: "Invalid sessionId" });
+      }
+      const sessionId = parseInt(req.params.sessionId);
+
+      const session = await storage.getInterleavedSessionById(sessionId);
+      if (!session || session.userId !== userId) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      await storage.completeInterleavedSession(sessionId);
+      res.json({ message: "Session completed successfully" });
+    } catch (error) {
+      console.error("Error completing session:", error);
+      res.status(500).json({ message: "Failed to complete session" });
+    }
+  });
+
+  // Ensure uploaded files are not served directly
+  // If you ever add a route to serve files from /uploads, always check authentication and user ownership!
+  // Example (do NOT enable without auth):
+  // app.use('/uploads', isAuthenticated, express.static(path.join(__dirname, '../uploads')));
 
   const httpServer = createServer(app);
   return httpServer;
@@ -472,7 +750,7 @@ async function syncCanvasData(userId: string, accessToken: string) {
       if (course) {
         const assignmentData = insertAssignmentSchema.parse({
           canvasId: canvasAssignment.id.toString(),
-          courseId: course.id,
+          courseId: course.id || null,
           userId,
           name: canvasAssignment.name,
           description: canvasAssignment.description,
@@ -495,7 +773,12 @@ async function getContextForChat(userId: string, courseId?: string): Promise<str
   try {
     let documents;
     if (courseId) {
-      documents = await storage.getDocumentsByCourseId(parseInt(courseId));
+      const courseIdNum = parseInt(courseId);
+      if (!isNaN(courseIdNum)) {
+        documents = await storage.getDocumentsByCourseId(courseIdNum);
+      } else {
+        documents = await storage.getDocumentsByUserId(userId);
+      }
     } else {
       documents = await storage.getDocumentsByUserId(userId);
     }

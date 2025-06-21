@@ -1,7 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import type { User } from "@shared/schema";
 import { 
   Brain, 
   Home, 
@@ -9,15 +10,17 @@ import {
   MessageSquare, 
   CreditCard, 
   Target,
-  User,
+  User as UserIcon,
   Menu,
   X,
-  CheckCircle
+  CheckCircle,
+  RotateCcw
 } from "lucide-react";
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
+  const typedUser = user as User | undefined;
 
   return (
     <>
@@ -63,6 +66,13 @@ export default function Navigation() {
                 <span>Flashcards</span>
               </a>
               <a 
+                href="/interleaved" 
+                className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Interleaved</span>
+              </a>
+              <a 
                 href="/assessment" 
                 className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               >
@@ -81,22 +91,22 @@ export default function Navigation() {
               {/* User Profile */}
               <div className="hidden md:flex items-center space-x-3">
                 <div className="w-8 h-8 bg-neutral-300 rounded-full overflow-hidden">
-                  {user?.profileImageUrl ? (
+                  {typedUser?.profileImageUrl ? (
                     <img 
-                      src={user.profileImageUrl} 
+                      src={typedUser.profileImageUrl} 
                       alt="Profile" 
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <div className="w-full h-full bg-neutral-300 flex items-center justify-center">
-                      <User className="w-4 h-4 text-neutral-600" />
+                      <UserIcon className="w-4 h-4 text-neutral-600" />
                     </div>
                   )}
                 </div>
                 <span className="text-sm font-medium text-neutral-800">
-                  {user?.firstName && user?.lastName 
-                    ? `${user.firstName} ${user.lastName}`
-                    : user?.email || 'User'
+                  {typedUser?.firstName && typedUser?.lastName 
+                    ? `${typedUser.firstName} ${typedUser.lastName}`
+                    : typedUser?.email || 'User'
                   }
                 </span>
               </div>
@@ -161,6 +171,14 @@ export default function Navigation() {
                 <span>Flashcards</span>
               </a>
               <a 
+                href="/interleaved" 
+                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <RotateCcw className="w-5 h-5" />
+                <span>Interleaved</span>
+              </a>
+              <a 
                 href="/assessment" 
                 className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
@@ -172,22 +190,22 @@ export default function Navigation() {
               <div className="pt-4 border-t border-neutral-200">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-8 h-8 bg-neutral-300 rounded-full overflow-hidden">
-                    {user?.profileImageUrl ? (
+                    {typedUser?.profileImageUrl ? (
                       <img 
-                        src={user.profileImageUrl} 
+                        src={typedUser.profileImageUrl} 
                         alt="Profile" 
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full bg-neutral-300 flex items-center justify-center">
-                        <User className="w-4 h-4 text-neutral-600" />
+                        <UserIcon className="w-4 h-4 text-neutral-600" />
                       </div>
                     )}
                   </div>
                   <span className="text-sm font-medium text-neutral-800">
-                    {user?.firstName && user?.lastName 
-                      ? `${user.firstName} ${user.lastName}`
-                      : user?.email || 'User'
+                    {typedUser?.firstName && typedUser?.lastName 
+                      ? `${typedUser.firstName} ${typedUser.lastName}`
+                      : typedUser?.email || 'User'
                     }
                   </span>
                 </div>

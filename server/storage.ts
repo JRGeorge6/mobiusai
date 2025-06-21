@@ -8,6 +8,8 @@ import {
   flashcards,
   learningAssessments,
   chatSessions,
+  interleavedSessions,
+  interleavedQuestions,
   type User,
   type UpsertUser,
   type Course,
@@ -26,6 +28,10 @@ import {
   type InsertLearningAssessment,
   type ChatSession,
   type InsertChatSession,
+  type InterleavedSession,
+  type InsertInterleavedSession,
+  type InterleavedQuestion,
+  type InsertInterleavedQuestion,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, lte, gte } from "drizzle-orm";
@@ -53,6 +59,7 @@ export interface IStorage {
   // Concept operations
   createConcept(concept: InsertConcept): Promise<Concept>;
   getConceptsByCourseId(courseId: number): Promise<Concept[]>;
+  getConceptsByUserId(userId: string): Promise<Concept[]>;
   
   // Concept progress operations
   upsertConceptProgress(progress: InsertConceptProgress): Promise<ConceptProgress>;
@@ -72,6 +79,20 @@ export interface IStorage {
   createChatSession(session: InsertChatSession): Promise<ChatSession>;
   updateChatSession(id: number, updates: Partial<ChatSession>): Promise<ChatSession>;
   getChatSessionsByUserId(userId: string): Promise<ChatSession[]>;
+  
+  // Interleaved session operations
+  createInterleavedSession(session: InsertInterleavedSession): Promise<InterleavedSession>;
+  getInterleavedSessionsByUserId(userId: string): Promise<InterleavedSession[]>;
+  getInterleavedSessionById(sessionId: number): Promise<InterleavedSession | undefined>;
+  updateInterleavedSessionProgress(sessionId: number): Promise<void>;
+  completeInterleavedSession(sessionId: number): Promise<void>;
+  
+  // Interleaved question operations
+  createInterleavedQuestion(question: InsertInterleavedQuestion): Promise<InterleavedQuestion>;
+  getInterleavedQuestionsBySessionId(sessionId: number): Promise<InterleavedQuestion[]>;
+  getInterleavedQuestionById(questionId: number): Promise<InterleavedQuestion | undefined>;
+  updateInterleavedQuestionAnswer(questionId: number, userAnswer: string, isCorrect: boolean, timeSpent: number): Promise<void>;
+  updateInterleavedQuestionOrder(questionId: number, order: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -169,6 +190,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(concepts).where(eq(concepts.courseId, courseId));
   }
 
+  async getConceptsByUserId(userId: string): Promise<Concept[]> {
+    return await db.select().from(concepts).where(eq(concepts.userId, userId));
+  }
+
   // Concept progress operations
   async upsertConceptProgress(progress: InsertConceptProgress): Promise<ConceptProgress> {
     const [result] = await db.insert(conceptProgress)
@@ -249,6 +274,82 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(chatSessions)
       .where(eq(chatSessions.userId, userId))
       .orderBy(desc(chatSessions.updatedAt));
+  }
+
+  // Interleaved session operations
+  async createInterleavedSession(session: InsertInterleavedSession): Promise<InterleavedSession> {
+    const [newSession] = await db.insert(interleavedSessions).values(session).returning();
+    return newSession;
+  }
+
+  async getInterleavedSessionsByUserId(userId: string): Promise<InterleavedSession[]> {
+    return await db.select().from(interleavedSessions)
+      .where(eq(interleavedSessions.userId, userId))
+      .orderBy(desc(interleavedSessions.createdAt));
+  }
+
+  async getInterleavedSessionById(sessionId: number): Promise<InterleavedSession | undefined> {
+    const [session] = await db.select().from(interleavedSessions).where(eq(interleavedSessions.id, sessionId));
+    return session;
+  }
+
+  async updateInterleavedSessionProgress(sessionId: number): Promise<void> {
+    const questions = await this.getInterleavedQuestionsBySessionId(sessionId);
+    const answeredQuestions = questions.filter(q => q.userAnswer !== null);
+    const correctAnswers = answeredQuestions.filter(q => q.isCorrect === true).length;
+
+    await db.update(interleavedSessions)
+      .set({
+        questionsAnswered: answeredQuestions.length,
+        correctAnswers,
+        updatedAt: new Date(),
+      })
+      .where(eq(interleavedSessions.id, sessionId));
+  }
+
+  async completeInterleavedSession(sessionId: number): Promise<void> {
+    await db.update(interleavedSessions)
+      .set({
+        isActive: false,
+        completedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(interleavedSessions.id, sessionId));
+  }
+
+  // Interleaved question operations
+  async createInterleavedQuestion(question: InsertInterleavedQuestion): Promise<InterleavedQuestion> {
+    const [newQuestion] = await db.insert(interleavedQuestions).values(question).returning();
+    return newQuestion;
+  }
+
+  async getInterleavedQuestionsBySessionId(sessionId: number): Promise<InterleavedQuestion[]> {
+    return await db.select().from(interleavedQuestions)
+      .where(eq(interleavedQuestions.sessionId, sessionId))
+      .orderBy(interleavedQuestions.orderInSession);
+  }
+
+  async getInterleavedQuestionById(questionId: number): Promise<InterleavedQuestion | undefined> {
+    const [question] = await db.select().from(interleavedQuestions).where(eq(interleavedQuestions.id, questionId));
+    return question;
+  }
+
+  async updateInterleavedQuestionAnswer(questionId: number, userAnswer: string, isCorrect: boolean, timeSpent: number): Promise<void> {
+    await db.update(interleavedQuestions)
+      .set({
+        userAnswer,
+        isCorrect,
+        timeSpent,
+      })
+      .where(eq(interleavedQuestions.id, questionId));
+  }
+
+  async updateInterleavedQuestionOrder(questionId: number, order: number): Promise<void> {
+    await db.update(interleavedQuestions)
+      .set({
+        orderInSession: order,
+      })
+      .where(eq(interleavedQuestions.id, questionId));
   }
 }
 
