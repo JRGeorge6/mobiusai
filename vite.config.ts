@@ -5,10 +5,11 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
   return {
+    root: "client",
     plugins: [react()],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
+        "@": path.resolve(__dirname, "client/src"),
       },
     },
     server: {
@@ -16,7 +17,7 @@ export default defineConfig(async () => {
       host: true,
     },
     build: {
-      outDir: "dist/public",
+      outDir: "../dist/public",
       sourcemap: true,
     },
   };
