@@ -1,8 +1,8 @@
-# StudyMentor Deployment Guide
+# MobiusAI Deployment Guide
 
 ## Overview
 
-StudyMentor is a full-stack application with:
+MobiusAI is a full-stack application with:
 - **Frontend**: React + Vite + TypeScript
 - **Backend**: Express.js + TypeScript
 - **Database**: PostgreSQL (Neon)
@@ -97,10 +97,10 @@ Render provides free hosting with PostgreSQL support and no credit card required
    - Go to [render.com](https://render.com)
    - Sign up with GitHub (no credit card required)
    - Connect your GitHub account
-   - Select your StudyMentor repository
+   - Select your MobiusAI repository
 
 2. **Create Web Service**:
-   - **Name**: StudyMentor
+   - **Name**: MobiusAI
    - **Environment**: Node
    - **Build Command**: `npm install && npm run build`
    - **Start Command**: `npm start`
@@ -109,7 +109,7 @@ Render provides free hosting with PostgreSQL support and no credit card required
 
 3. **Add PostgreSQL Database**:
    - In Render dashboard, click "New" → "PostgreSQL"
-   - **Name**: StudyMentor-DB
+   - **Name**: MobiusAI-DB
    - **Plan**: Free
    - **Region**: Same as web service
    - Copy the connection string
@@ -380,4 +380,4 @@ ENABLE_VERBOSE_LOGGING=true
 - ✅ Caching headers are set
 - ✅ Build process is optimized
 
-Your StudyMentor application is now ready for deployment! Choose your preferred platform and follow the steps above. 
+Your MobiusAI application is now ready for deployment! Choose your preferred platform and follow the steps above. 

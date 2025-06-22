@@ -43,7 +43,7 @@ export default function Navigation() {
               <div className="w-10 h-10 bg-coral rounded-xl flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-neutral-800">StudyMentor</h1>
+              <h1 className="text-2xl font-bold text-neutral-800">MobiusAI</h1>
             </div>
             
             {/* Desktop Navigation */}
