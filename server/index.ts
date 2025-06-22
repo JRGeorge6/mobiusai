@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
+import path from "path";
 import { 
   config, 
   getAllowedOrigins, 
@@ -11,6 +12,24 @@ import {
   isDebugMode,
   getRateLimitConfig 
 } from "./config";
+
+// Get __dirname equivalent for both ESM and CommonJS
+function getDirname(): string {
+  // Check if we're in a CommonJS environment where __dirname is available
+  if (typeof __dirname !== 'undefined') {
+    return __dirname;
+  }
+  
+  // ESM environment - try to use import.meta.url
+  if (typeof import.meta !== 'undefined' && import.meta.url) {
+    const { fileURLToPath } = require("url");
+    const __filename = fileURLToPath(import.meta.url);
+    return path.dirname(__filename);
+  }
+  
+  // Fallback to process.cwd()
+  return process.cwd();
+}
 
 // Simple logging function
 function log(message: string) {
@@ -146,7 +165,7 @@ app.get('/health', (req, res) => {
       // Production static file serving
       const path = await import("path");
       const fs = await import("fs");
-      const distPath = path.resolve(import.meta.dirname, "public");
+      const distPath = path.resolve(getDirname(), "public");
       
       if (!fs.existsSync(distPath)) {
         throw new Error(
