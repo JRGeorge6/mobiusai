@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
@@ -12,6 +11,17 @@ import {
   isDebugMode,
   getRateLimitConfig 
 } from "./config";
+
+// Simple logging function
+function log(message: string) {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [express] ${message}`);
+}
 
 const app = express();
 
@@ -129,9 +139,25 @@ app.get('/health', (req, res) => {
 
     // Setup Vite in development
     if (isDevelopment()) {
+      const viteModule = await import("./vite");
+      const setupVite = viteModule.setupVite;
+      const serveStatic = viteModule.serveStatic;
       await setupVite(app, server);
     } else {
-      serveStatic(app);
+      const path = await import("path");
+      const fs = await import("fs");
+      const distPath = path.resolve(import.meta.dirname, "public");
+      
+      if (!fs.existsSync(distPath)) {
+        throw new Error(
+          `Could not find the build directory: ${distPath}, make sure to build the client first`,
+        );
+      }
+      
+      app.use(express.static(distPath));
+      app.use("*", (_req: any, res: any) => {
+        res.sendFile(path.resolve(distPath, "index.html"));
+      });
     }
 
     // Start server
