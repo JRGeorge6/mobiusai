@@ -138,12 +138,13 @@ app.get('/health', (req, res) => {
     });
 
     // Setup Vite in development
-    if (isDevelopment()) {
+    if (process.env.NODE_ENV !== 'production') {
+      // Only import Vite in development - this ensures it's tree-shaken from production builds
       const viteModule = await import("./vite");
       const setupVite = viteModule.setupVite;
-      const serveStatic = viteModule.serveStatic;
       await setupVite(app, server);
     } else {
+      // Production static file serving - no Vite imports
       const path = await import("path");
       const fs = await import("fs");
       const distPath = path.resolve(import.meta.dirname, "public");
