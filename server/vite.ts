@@ -5,11 +5,26 @@ import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
-import { fileURLToPath } from "url";
 
-// Get __dirname equivalent for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Get __dirname equivalent for both ESM and CommonJS
+function getDirname(): string {
+  // Check if we're in a CommonJS environment where __dirname is available
+  if (typeof __dirname !== 'undefined') {
+    return __dirname;
+  }
+  
+  // ESM environment - try to use import.meta.url
+  if (typeof import.meta !== 'undefined' && import.meta.url) {
+    const { fileURLToPath } = require("url");
+    const __filename = fileURLToPath(import.meta.url);
+    return path.dirname(__filename);
+  }
+  
+  // Fallback to process.cwd()
+  return process.cwd();
+}
+
+const __dirname = getDirname();
 
 const viteLogger = createLogger();
 
