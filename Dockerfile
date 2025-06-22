@@ -42,7 +42,7 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application
 COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nextjs:nodejs /app/client/dist ./client/dist
+COPY --from=builder --chown=nextjs:nodejs /app/dist/public ./dist/public
 
 # Create uploads directory
 RUN mkdir -p uploads && chown nextjs:nodejs uploads
