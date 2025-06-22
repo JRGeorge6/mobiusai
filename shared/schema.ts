@@ -10,33 +10,34 @@ import {
   boolean,
   decimal,
   date,
+  real,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table (required for Replit Auth)
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
+// Session storage table
+export const sessions = pgTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  expires: timestamp("expires").notNull(),
+  data: text("data").notNull(),
+});
 
-// User storage table (required for Replit Auth)
+// User storage table
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  id: text("id").primaryKey(),
+  email: text("email").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  profileImageUrl: text("profile_image_url"),
+  authProvider: text("auth_provider"),
+  authProviderId: text("auth_provider_id"),
+  passwordHash: text("password_hash"),
   canvasAccessToken: text("canvas_access_token"),
   canvasRefreshToken: text("canvas_refresh_token"),
   canvasTokenExpiry: timestamp("canvas_token_expiry"),
-  canvasUserId: varchar("canvas_user_id"),
+  canvasUserId: text("canvas_user_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

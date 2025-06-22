@@ -20,6 +20,7 @@ const envSchema = z.object({
   // Server
   PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)).default('3000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  BASE_URL: z.string().url().optional(),
   
   // Security
   SESSION_SECRET: z.string().min(32).default('your-super-secret-session-key-change-this-in-production'),
@@ -33,7 +34,9 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.string().transform(Number).pipe(z.number().positive()).default('900000'), // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).pipe(z.number().positive()).default('100'),
   SENSITIVE_OPERATION_LIMIT: z.string().transform(Number).pipe(z.number().positive()).default('10'),
+  SENSITIVE_OPERATION_WINDOW_MS: z.string().transform(Number).pipe(z.number().positive()).default('60000'), // 1 minute
   OPENAI_REQUEST_LIMIT: z.string().transform(Number).pipe(z.number().positive()).default('50'),
+  OPENAI_REQUEST_WINDOW_MS: z.string().transform(Number).pipe(z.number().positive()).default('60000'), // 1 minute
   
   // CORS
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
@@ -46,6 +49,12 @@ const envSchema = z.object({
   // Development
   ENABLE_DEBUG_MODE: z.string().transform(val => val === 'true').default('false'),
   ENABLE_VERBOSE_LOGGING: z.string().transform(val => val === 'true').default('false'),
+  
+  // Authentication providers (optional)
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GITHUB_CLIENT_ID: z.string().optional(),
+  GITHUB_CLIENT_SECRET: z.string().optional(),
 });
 
 // Parse and validate environment variables

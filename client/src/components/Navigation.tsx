@@ -1,8 +1,8 @@
 import React, { useState } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { User } from "@shared/schema";
 import { 
   Brain, 
   Home, 
@@ -14,13 +14,24 @@ import {
   Menu,
   X,
   CheckCircle,
-  RotateCcw
+  RotateCcw,
+  LogOut
 } from "lucide-react";
 
 export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user } = useAuth();
-  const typedUser = user as User | undefined;
+  const { user, logout } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const handleLogout = async () => {
+    await logout();
+    setLocation('/');
+  };
+
+  const handleNavigation = (path: string) => {
+    setLocation(path);
+    setMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -32,53 +43,53 @@ export default function Navigation() {
               <div className="w-10 h-10 bg-coral rounded-xl flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-neutral-800">Mobius</h1>
+              <h1 className="text-2xl font-bold text-neutral-800">StudyMentor</h1>
             </div>
             
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-6">
-              <a 
-                href="/" 
+              <button 
+                onClick={() => handleNavigation('/')}
                 className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               >
                 <Home className="w-4 h-4" />
                 <span>Dashboard</span>
-              </a>
-              <a 
-                href="/library" 
+              </button>
+              <button 
+                onClick={() => handleNavigation('/library')}
                 className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               >
                 <BookOpen className="w-4 h-4" />
                 <span>Library</span>
-              </a>
-              <a 
-                href="/chat" 
+              </button>
+              <button 
+                onClick={() => handleNavigation('/chat')}
                 className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>Study Chat</span>
-              </a>
-              <a 
-                href="/flashcards" 
+              </button>
+              <button 
+                onClick={() => handleNavigation('/flashcards')}
                 className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               >
                 <CreditCard className="w-4 h-4" />
                 <span>Flashcards</span>
-              </a>
-              <a 
-                href="/interleaved" 
+              </button>
+              <button 
+                onClick={() => handleNavigation('/interleaved')}
                 className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Interleaved</span>
-              </a>
-              <a 
-                href="/assessment" 
+              </button>
+              <button 
+                onClick={() => handleNavigation('/assessment')}
                 className="flex items-center space-x-2 text-neutral-700 hover:text-neutral-900 transition-colors"
               >
                 <Target className="w-4 h-4" />
                 <span>Assessment</span>
-              </a>
+              </button>
             </nav>
 
             {/* Canvas Integration Status & User Profile */}
@@ -91,9 +102,9 @@ export default function Navigation() {
               {/* User Profile */}
               <div className="hidden md:flex items-center space-x-3">
                 <div className="w-8 h-8 bg-neutral-300 rounded-full overflow-hidden">
-                  {typedUser?.profileImageUrl ? (
+                  {user?.profileImageUrl ? (
                     <img 
-                      src={typedUser.profileImageUrl} 
+                      src={user.profileImageUrl} 
                       alt="Profile" 
                       className="w-full h-full object-cover"
                     />
@@ -104,9 +115,9 @@ export default function Navigation() {
                   )}
                 </div>
                 <span className="text-sm font-medium text-neutral-800">
-                  {typedUser?.firstName && typedUser?.lastName 
-                    ? `${typedUser.firstName} ${typedUser.lastName}`
-                    : typedUser?.email || 'User'
+                  {user?.firstName && user?.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user?.email || 'User'
                   }
                 </span>
               </div>
@@ -123,11 +134,12 @@ export default function Navigation() {
 
               {/* Logout Button (Desktop) */}
               <Button
-                onClick={() => window.location.href = '/api/logout'}
+                onClick={handleLogout}
                 variant="outline"
                 size="sm"
                 className="hidden lg:inline-flex bg-white/50 hover:bg-white/70"
               >
+                <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
             </div>
@@ -138,61 +150,55 @@ export default function Navigation() {
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-white/20 bg-white/90 backdrop-blur-md">
             <div className="px-4 py-4 space-y-4">
-              <a 
-                href="/" 
-                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+              <button 
+                onClick={() => handleNavigation('/')}
+                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors w-full text-left"
               >
                 <Home className="w-5 h-5" />
                 <span>Dashboard</span>
-              </a>
-              <a 
-                href="/library" 
-                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+              </button>
+              <button 
+                onClick={() => handleNavigation('/library')}
+                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors w-full text-left"
               >
                 <BookOpen className="w-5 h-5" />
                 <span>Library</span>
-              </a>
-              <a 
-                href="/chat" 
-                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+              </button>
+              <button 
+                onClick={() => handleNavigation('/chat')}
+                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors w-full text-left"
               >
                 <MessageSquare className="w-5 h-5" />
                 <span>Study Chat</span>
-              </a>
-              <a 
-                href="/flashcards" 
-                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+              </button>
+              <button 
+                onClick={() => handleNavigation('/flashcards')}
+                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors w-full text-left"
               >
                 <CreditCard className="w-5 h-5" />
                 <span>Flashcards</span>
-              </a>
-              <a 
-                href="/interleaved" 
-                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+              </button>
+              <button 
+                onClick={() => handleNavigation('/interleaved')}
+                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors w-full text-left"
               >
                 <RotateCcw className="w-5 h-5" />
                 <span>Interleaved</span>
-              </a>
-              <a 
-                href="/assessment" 
-                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
+              </button>
+              <button 
+                onClick={() => handleNavigation('/assessment')}
+                className="flex items-center space-x-3 text-neutral-700 hover:text-neutral-900 transition-colors w-full text-left"
               >
                 <Target className="w-5 h-5" />
                 <span>Assessment</span>
-              </a>
+              </button>
               
               <div className="pt-4 border-t border-neutral-200">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-8 h-8 bg-neutral-300 rounded-full overflow-hidden">
-                    {typedUser?.profileImageUrl ? (
+                    {user?.profileImageUrl ? (
                       <img 
-                        src={typedUser.profileImageUrl} 
+                        src={user.profileImageUrl} 
                         alt="Profile" 
                         className="w-full h-full object-cover"
                       />
@@ -203,17 +209,20 @@ export default function Navigation() {
                     )}
                   </div>
                   <span className="text-sm font-medium text-neutral-800">
-                    {typedUser?.firstName && typedUser?.lastName 
-                      ? `${typedUser.firstName} ${typedUser.lastName}`
-                      : typedUser?.email || 'User'
+                    {user?.firstName && user?.lastName 
+                      ? `${user.firstName} ${user.lastName}`
+                      : user?.email || 'User'
                     }
                   </span>
                 </div>
+                
                 <Button
-                  onClick={() => window.location.href = '/api/logout'}
+                  onClick={handleLogout}
                   variant="outline"
-                  className="w-full bg-white/50 hover:bg-white/70"
+                  size="sm"
+                  className="w-full"
                 >
+                  <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>
               </div>
@@ -222,47 +231,8 @@ export default function Navigation() {
         )}
       </header>
 
-      {/* Bottom Navigation (Mobile) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 glassmorphic border-t border-white/20 z-50">
-        <div className="flex justify-around py-3">
-          <a 
-            href="/"
-            className="flex flex-col items-center space-y-1 text-neutral-600 hover:text-coral transition-colors"
-          >
-            <Home className="w-5 h-5" />
-            <span className="text-xs">Home</span>
-          </a>
-          <a 
-            href="/library"
-            className="flex flex-col items-center space-y-1 text-neutral-600 hover:text-coral transition-colors"
-          >
-            <BookOpen className="w-5 h-5" />
-            <span className="text-xs">Library</span>
-          </a>
-          <a 
-            href="/chat"
-            className="flex flex-col items-center space-y-1"
-          >
-            <div className="w-10 h-10 bg-coral rounded-full flex items-center justify-center">
-              <Brain className="w-5 h-5 text-white" />
-            </div>
-          </a>
-          <a 
-            href="/flashcards"
-            className="flex flex-col items-center space-y-1 text-neutral-600 hover:text-coral transition-colors"
-          >
-            <CreditCard className="w-5 h-5" />
-            <span className="text-xs">Cards</span>
-          </a>
-          <a 
-            href="/assessment"
-            className="flex flex-col items-center space-y-1 text-neutral-600 hover:text-coral transition-colors"
-          >
-            <Target className="w-5 h-5" />
-            <span className="text-xs">Profile</span>
-          </a>
-        </div>
-      </nav>
+      {/* Spacer for fixed header */}
+      <div className="h-20"></div>
     </>
   );
 }

@@ -1,363 +1,269 @@
-# Mobius - AI-Powered Learning Platform Project Plan
+# StudyMentor - AI-Powered Study Assistant
 
 ## Project Overview
 
-Mobius is a comprehensive Canvas-integrated Study Assistant that leverages AI to provide personalized learning experiences. The platform combines modern web technologies with advanced AI capabilities to help students optimize their study methods, track assignments, and master course concepts through evidence-based learning techniques.
+StudyMentor is a comprehensive study assistant application that leverages AI to help students learn more effectively. It integrates with Canvas LMS, provides adaptive learning features, and offers multiple study techniques including flashcards, interleaved practice, and AI-powered tutoring.
 
-## Current Implementation Status
+## Core Features
 
-### ✅ Completed Features
+### 🎯 **Learning Management**
+- **Canvas Integration**: Seamless sync with Canvas courses and assignments
+- **Document Processing**: Upload and analyze study materials (PDF, Word, text)
+- **Concept Extraction**: AI-powered extraction of key concepts from documents
+- **Progress Tracking**: Monitor learning progress across all subjects
 
-#### 1. Authentication & User Management
-- **Replit Authentication**: Seamless login/logout with OpenID Connect
-- **Canvas OAuth Integration**: Secure connection to Canvas LMS accounts
-- **Session Management**: PostgreSQL-backed session storage with automatic token refresh
-- **User Profile System**: Complete user data management with Canvas profile sync
+### 🧠 **AI-Powered Learning**
+- **Adaptive Tutoring**: Personalized study sessions based on learning style
+- **Active Recall**: AI-generated questions to test knowledge retention
+- **Feynman Technique**: AI helps explain complex concepts in simple terms
+- **Interleaved Practice**: Mixed topic practice for better retention
 
-#### 2. Database Architecture
-- **PostgreSQL Database**: Fully configured with Drizzle ORM
-- **Comprehensive Schema**: 12 interconnected tables supporting all features
-  - Users, Courses, Assignments, Documents, Concepts
-  - Flashcards, Learning Assessments, Chat Sessions, Concept Progress
-  - Interleaved Sessions, Interleaved Questions
-  - Session storage for authentication
-- **Type Safety**: Complete TypeScript integration with Zod validation
+### 📚 **Study Tools**
+- **Smart Flashcards**: Spaced repetition with SM-2 algorithm
+- **Learning Assessments**: Identify your learning style preferences
+- **Study Sessions**: Timed, focused study periods with progress tracking
+- **Concept Maps**: Visual organization of related concepts
 
-#### 3. Canvas LMS Integration
-- **Course Synchronization**: Automatic import of enrolled courses
-- **Assignment Tracking**: Real-time assignment updates with due dates
-- **Token Management**: Secure OAuth2 token handling with refresh capability
-- **Data Sync**: Bidirectional synchronization between Canvas and StudyBot
+### 🔐 **Authentication & Security**
+- **Session-based Authentication**: Secure user sessions
+- **Multiple Login Options**: Demo, local, and OAuth providers (Google, GitHub)
+- **Canvas OAuth**: Secure integration with Canvas LMS
+- **Rate Limiting**: Protection against abuse
 
-#### 4. AI-Powered Services
-- **OpenAI Integration**: GPT-4o model for content analysis and generation
-- **Document Processing**: Multi-format support (PDF, DOCX, TXT)
-- **Concept Extraction**: Automatic identification of learning concepts from materials
-- **Content Chunking**: Intelligent text segmentation for AI processing
-- **Answer Evaluation**: AI-powered answer checking for interleaved studying
+## Technical Architecture
 
-#### 5. Learning Features
-- **Active Recall Mode**: AI-generated questions from course materials
-- **Feynman Method**: Conversational teaching simulation
-- **Spaced Repetition**: SM-2 algorithm implementation for flashcards
-- **Interleaved Studying**: Mixed topic sessions with AI-generated questions
-- **Learning Style Assessment**: Multi-modal testing with radar chart visualization
+### **Frontend Stack**
+- **React 18** with TypeScript
+- **Vite** for fast development and building
+- **Tailwind CSS** for styling
+- **Radix UI** for accessible components
+- **React Router** for navigation
+- **React Query** for data fetching
 
-#### 6. User Interface
-- **Modern React Frontend**: TypeScript with Vite build system
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
-- **Component Library**: Shadcn/ui with Radix UI primitives
-- **Dark Mode Support**: Complete theming system
-- **Navigation**: Intuitive sidebar navigation with route management
+### **Backend Stack**
+- **Node.js** with Express.js
+- **TypeScript** for type safety
+- **PostgreSQL** with Drizzle ORM
+- **Session-based Authentication** with multiple providers
+- **OpenAI API** integration
+- **Canvas API** integration
 
-#### 7. Document Library
-- **File Upload System**: Drag-and-drop interface with progress tracking
-- **Content Organization**: Course-based categorization
-- **Processing Pipeline**: Automated concept extraction and flashcard generation
-- **Storage Management**: Secure file handling with cleanup
+### **Database Schema**
+- **Users**: Authentication and profile data
+- **Courses**: Canvas course information
+- **Assignments**: Canvas assignment tracking
+- **Documents**: Uploaded study materials
+- **Concepts**: Extracted learning concepts
+- **Flashcards**: Spaced repetition cards
+- **Learning Assessments**: User learning style data
+- **Chat Sessions**: AI interaction history
+- **Interleaved Sessions**: Mixed topic practice sessions
 
-### 🔄 Current Pages and Components
+### **Security Features**
+- **Helmet.js** for security headers
+- **Rate limiting** for API protection
+- **Input validation** with Zod schemas
+- **CORS configuration** for cross-origin requests
+- **Session management** with secure cookies
 
-#### Core Pages
-1. **Landing Page** (`/`)
-   - Welcome interface for unauthenticated users
-   - Login call-to-action with feature highlights
-   - Modern gradient design with clear value proposition
+## Development Setup
 
-2. **Dashboard** (`/` - authenticated)
-   - Personalized overview of study progress
-   - Recent activity feed and quick actions
-   - Assignment due date tracking
-   - Course progress visualization
+### **Prerequisites**
+- Node.js 18+
+- PostgreSQL database
+- OpenAI API key
+- Canvas API credentials (optional)
 
-3. **Library** (`/library`)
-   - Document upload and management interface
-   - Course-based organization system
-   - Processing status tracking
-   - Concept extraction results
+### **Environment Variables**
+```bash
+# Database
+DATABASE_URL=postgresql://...
 
-4. **Chat Interface** (`/chat`)
-   - AI-powered study conversations
-   - Active Recall and Feynman mode selection
-   - Context-aware responses based on course materials
-   - Chat history management
+# Security
+SESSION_SECRET=your-super-secret-session-key-min-32-chars
+COOKIE_SECRET=your-cookie-secret-min-32-chars
 
-5. **Flashcards** (`/flashcards`)
-   - Spaced repetition study sessions
-   - Progress tracking with SM-2 algorithm
-   - Due card prioritization
-   - Performance analytics
+# OpenAI
+OPENAI_API_KEY=your-openai-api-key
 
-6. **Interleaved Studying** (`/interleaved`)
-   - Session creation with concept selection
-   - Mixed topic question generation
-   - Progress tracking and analytics
-   - Session completion management
+# Canvas LMS (optional)
+CANVAS_CLIENT_ID=your-canvas-client-id
+CANVAS_CLIENT_SECRET=your-canvas-client-secret
+CANVAS_REDIRECT_URI=https://your-domain.com/api/canvas/callback
 
-7. **Interleaved Session** (`/interleaved/:sessionId`)
-   - Interactive question answering interface
-   - Multiple question types (MCQ, short answer, true/false)
-   - Real-time feedback and explanations
-   - Session statistics and timing
+# Authentication (optional)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+BASE_URL=https://your-domain.com
 
-8. **Learning Assessment** (`/assessment`)
-   - Multi-modal learning style evaluation
-   - Visual, auditory, kinesthetic, reading, social, logical testing
-   - Radar chart visualization of results
-   - Personalized study recommendations
+# Server
+NODE_ENV=production
+PORT=3000
+```
 
-#### UI Components
-- **Navigation**: Responsive sidebar with active state management
-- **RadarChart**: Custom D3-based visualization for learning assessments
-- **Card Components**: CourseCard, AssignmentCard, ConceptCard for data display
-- **Form Components**: File upload, assessment forms with validation
-- **Loading States**: Skeleton screens and progress indicators
+### **Installation**
+```bash
+# Clone repository
+git clone <repository-url>
+cd StudyMentor
 
-### 🎯 Detailed Feature Specifications
+# Install dependencies
+npm install
 
-#### Active Recall System
-- **Question Generation**: AI analyzes uploaded documents to create targeted questions
-- **Adaptive Difficulty**: Questions adjust based on user performance
-- **Context Awareness**: Draws from specific course materials and previous interactions
-- **Progress Tracking**: Measures improvement over time
+# Set up database
+npm run db:push
 
-#### Feynman Method Implementation
-- **Teaching Simulation**: User explains concepts to AI "student"
-- **Feedback Loop**: AI identifies gaps in understanding
-- **Concept Reinforcement**: Suggests areas for deeper study
-- **Conversational Learning**: Natural dialogue interface
+# Start development server
+npm run dev
+```
 
-#### Spaced Repetition Algorithm
-- **SM-2 Implementation**: Scientifically-proven spacing intervals
-- **Difficulty Adjustment**: Cards adapt based on recall success
-- **Optimal Scheduling**: Due dates calculated for maximum retention
-- **Performance Analytics**: Detailed progress tracking
+## Deployment
 
-#### Interleaved Studying System
-- **Mixed Topic Sessions**: Combines multiple concepts in single study sessions
-- **Question Variety**: Multiple choice, short answer, and true/false questions
-- **AI-Generated Content**: Questions created from user's course materials
-- **Progress Tracking**: Real-time analytics and session completion
-- **Difficulty Levels**: Easy, medium, and hard session options
-- **Concept Selection**: User chooses 2+ concepts to interleave
-- **Shuffled Order**: Questions mixed to prevent pattern recognition
+### **Recommended Platforms**
+- **Render** (Free tier available)
+- **Vercel** (Free tier available)
+- **Railway** (Free tier with $5 credit)
+- **Fly.io** (Free tier available)
 
-#### Learning Style Assessment
-- **Multi-Modal Testing**: 
-  - Visual: Image-based questions and spatial reasoning
-  - Auditory: Sound-based learning preferences
-  - Kinesthetic: Hands-on learning indicators
-  - Reading/Writing: Text-based learning preferences
-  - Social: Collaborative learning tendencies
-  - Logical: Analytical and systematic thinking
-- **Radar Visualization**: Interactive chart showing learning profile
-- **Personalized Recommendations**: Study methods tailored to results
+### **Deployment Steps**
+1. **Database Setup**: Provision PostgreSQL database
+2. **Environment Configuration**: Set all required environment variables
+3. **Build & Deploy**: Use platform-specific deployment commands
+4. **Domain Configuration**: Set up custom domain (optional)
+5. **SSL Certificate**: Enable HTTPS (automatic on most platforms)
 
-### 🔧 Technical Architecture
+## Feature Implementation Status
 
-#### Frontend Stack
-- **React 18**: Modern hooks and concurrent features
-- **TypeScript**: Full type safety across the application
-- **Vite**: Fast development and optimized builds
-- **TanStack Query**: Server state management with caching
-- **Wouter**: Lightweight client-side routing
-- **Tailwind CSS**: Utility-first styling with custom design system
-- **Shadcn/ui**: Accessible component library
+### ✅ **Completed Features**
+- **Project Structure**: Full-stack monorepo setup
+- **Database Schema**: Complete PostgreSQL schema with relations
+- **Authentication System**: Session-based auth with multiple providers
+- **API Routes**: Complete REST API for all features
+- **Frontend Components**: Modern UI with Tailwind CSS
+- **Canvas Integration**: OAuth and API integration
+- **Document Processing**: PDF, Word, and text file support
+- **AI Integration**: OpenAI API for concept extraction and tutoring
+- **Flashcard System**: Spaced repetition with SM-2 algorithm
+- **Study Sessions**: Timed practice sessions with progress tracking
+- **Security**: Rate limiting, input validation, CORS configuration
 
-#### Backend Stack
-- **Node.js + Express**: RESTful API server
-- **TypeScript**: Type-safe server development
-- **PostgreSQL**: Relational database with ACID compliance
-- **Drizzle ORM**: Type-safe database operations
-- **Passport.js**: Authentication middleware
-- **Multer**: File upload handling
-- **Session Management**: PostgreSQL-backed sessions
+### 🚧 **In Progress**
+- **Learning Style Assessment**: Questionnaire and analysis
+- **Interleaved Practice**: Mixed topic study sessions
+- **Progress Analytics**: Detailed learning progress tracking
 
-#### External Integrations
-- **OpenAI API**: GPT-4o for content analysis and generation
-- **Canvas LMS API**: Course and assignment synchronization
-- **Replit Auth**: OpenID Connect authentication
+### 📋 **Planned Features**
+- **Mobile App**: React Native version
+- **Offline Support**: Service worker for offline access
+- **Collaborative Study**: Group study sessions
+- **Advanced Analytics**: Machine learning insights
+- **Integration APIs**: Support for other LMS platforms
 
-### 📊 Database Schema Details
+## Performance Optimization
 
-#### Core Tables
-1. **users**: Authentication and profile data
-2. **sessions**: Secure session storage
-3. **courses**: Canvas course synchronization
-4. **assignments**: Assignment tracking with due dates
-5. **documents**: Uploaded study materials
-6. **concepts**: AI-extracted learning concepts
-7. **concept_progress**: Individual concept mastery tracking
-8. **flashcards**: Spaced repetition cards with SM-2 data
-9. **learning_assessments**: Learning style evaluation results
-10. **chat_sessions**: Conversational learning history
-11. **interleaved_sessions**: Mixed topic study sessions
-12. **interleaved_questions**: Questions for interleaved sessions
+### **Frontend**
+- **Code Splitting**: Lazy loading of components
+- **Image Optimization**: WebP format with fallbacks
+- **Caching**: Service worker for static assets
+- **Bundle Optimization**: Tree shaking and minification
 
-#### Relationship Model
-- Users have many courses, assignments, documents, flashcards, interleaved sessions
-- Courses contain assignments, documents, and concepts
-- Documents generate concepts which create flashcards and interleaved questions
-- Concept progress tracks individual mastery
-- Chat sessions maintain conversation context
-- Interleaved sessions contain multiple concepts and questions
+### **Backend**
+- **Database Indexing**: Optimized queries with proper indexes
+- **Connection Pooling**: Efficient database connections
+- **Caching**: Redis for frequently accessed data
+- **Compression**: Gzip compression for responses
 
-### 🚀 Deployment Strategy
+### **AI Integration**
+- **Request Batching**: Group similar AI requests
+- **Response Caching**: Cache AI responses when appropriate
+- **Rate Limiting**: Respect OpenAI API limits
+- **Error Handling**: Graceful fallbacks for AI failures
 
-#### Development Environment
-- **Replit Integration**: Optimized for Replit hosting
-- **Hot Module Replacement**: Instant development feedback
-- **Database Provisioning**: Automatic PostgreSQL setup
-- **Environment Management**: Secure secret handling
+## Security Considerations
 
-#### Production Build
-- **Frontend**: Vite production build to `dist/public`
-- **Backend**: ESBuild bundling to `dist/index.js`
-- **Database**: Drizzle migrations with `npm run db:push`
-- **Static Serving**: Express serves frontend assets
+### **Authentication**
+- **Session Security**: Secure session configuration
+- **Password Hashing**: bcrypt for password storage
+- **OAuth Security**: Proper OAuth flow implementation
+- **Token Management**: Secure token storage and rotation
 
-#### Required Environment Variables
-- `DATABASE_URL`: PostgreSQL connection
-- `OPENAI_API_KEY`: AI service access
-- `SESSION_SECRET`: Session encryption
-- `REPL_ID`: Replit environment identifier
-- Canvas OAuth credentials (when Canvas integration is configured)
+### **Data Protection**
+- **Input Sanitization**: Prevent XSS and injection attacks
+- **File Upload Security**: Validate and sanitize uploaded files
+- **API Security**: Rate limiting and request validation
+- **Database Security**: Parameterized queries and access control
 
-### 📈 Future Enhancement Roadmap
+### **Privacy**
+- **Data Minimization**: Only collect necessary user data
+- **User Consent**: Clear privacy policy and consent mechanisms
+- **Data Retention**: Automatic cleanup of old data
+- **GDPR Compliance**: Right to access and delete user data
 
-#### Phase 1: Core Optimization (Next 2-4 weeks)
-- **Performance Tuning**: Database query optimization
-- **Mobile Responsiveness**: Enhanced mobile experience
-- **Error Handling**: Comprehensive error states and recovery
-- **Accessibility**: WCAG compliance improvements
+## Monitoring & Analytics
 
-#### Phase 2: Advanced Features (1-2 months)
-- **Study Groups**: Collaborative learning features
-- **Progress Analytics**: Detailed performance dashboards
-- **Custom Quizzes**: User-generated assessment tools
-- **Export Functions**: Study material export capabilities
+### **Application Monitoring**
+- **Error Tracking**: Comprehensive error logging
+- **Performance Monitoring**: Response time and resource usage
+- **User Analytics**: Learning progress and feature usage
+- **Health Checks**: Application and database health monitoring
 
-#### Phase 3: Integration Expansion (2-3 months)
-- **Additional LMS Support**: Moodle, Blackboard integration
-- **Calendar Integration**: Google Calendar, Outlook sync
-- **Mobile App**: React Native companion app
-- **Offline Mode**: Progressive Web App capabilities
+### **Business Metrics**
+- **User Engagement**: Active users and session duration
+- **Learning Outcomes**: Progress tracking and success rates
+- **Feature Adoption**: Usage of different study tools
+- **Retention Analysis**: User retention and churn rates
 
-#### Phase 4: AI Enhancement (3-6 months)
-- **Advanced NLP**: Better document understanding
-- **Personalization Engine**: ML-based study recommendations
-- **Voice Integration**: Speech-to-text and text-to-speech
-- **Visual Learning**: Image and diagram analysis
+## Future Roadmap
 
-### 🛠️ Development Workflow
+### **Phase 1: Core Platform (Current)**
+- ✅ Complete authentication system
+- ✅ Canvas integration
+- ✅ Basic AI features
+- ✅ Flashcard system
 
-#### Code Organization
-- **Monorepo Structure**: Unified frontend/backend codebase
-- **Shared Types**: Common type definitions in `shared/schema.ts`
-- **Service Layer**: Modular backend services
-- **Component Architecture**: Reusable UI components
+### **Phase 2: Advanced Learning (Next)**
+- 🚧 Learning style assessments
+- 🚧 Interleaved practice sessions
+- 📋 Advanced progress analytics
+- 📋 Collaborative features
 
-#### Quality Assurance
-- **Type Safety**: Full TypeScript coverage
-- **Database Validation**: Zod schema validation
-- **Error Boundaries**: React error handling
-- **Security**: CSRF protection, secure sessions
+### **Phase 3: Platform Expansion (Future)**
+- 📋 Mobile application
+- 📋 Additional LMS integrations
+- 📋 Advanced AI features
+- 📋 Enterprise features
 
-#### Maintenance
-- **Documentation**: Comprehensive inline documentation
-- **Testing Strategy**: Unit and integration test preparation
-- **Monitoring**: Application performance tracking
-- **Updates**: Regular dependency maintenance
+## Contributing
 
-### 📋 Setup and Configuration Guide
+### **Development Guidelines**
+- **TypeScript**: Strict type checking enabled
+- **ESLint**: Code quality and consistency
+- **Prettier**: Code formatting
+- **Testing**: Unit and integration tests
+- **Documentation**: Comprehensive code documentation
 
-#### Initial Setup
-1. **Database**: Run `npm run db:push` to initialize schema
-2. **Environment**: Configure required environment variables
-3. **Dependencies**: All packages pre-installed and configured
-4. **Authentication**: Replit Auth automatically configured
+### **Code Review Process**
+- **Pull Request Reviews**: Required for all changes
+- **Automated Testing**: CI/CD pipeline with tests
+- **Security Review**: Security-focused code review
+- **Performance Review**: Performance impact assessment
 
-#### Canvas Integration Setup
-1. **OAuth App**: Create Canvas OAuth application
-2. **Credentials**: Add Canvas client ID and secret
-3. **Permissions**: Configure required Canvas scopes
-4. **Testing**: Verify course and assignment sync
+## Support & Documentation
 
-#### OpenAI Configuration
-1. **API Key**: Obtain OpenAI API key
-2. **Environment**: Add OPENAI_API_KEY to environment
-3. **Testing**: Verify AI features functionality
-4. **Usage Monitoring**: Track API usage and costs
+### **User Documentation**
+- **Getting Started Guide**: Quick setup instructions
+- **Feature Documentation**: Detailed feature explanations
+- **Troubleshooting**: Common issues and solutions
+- **Video Tutorials**: Step-by-step video guides
 
-### 🎨 Design System
-
-#### Color Palette
-- **Primary**: Modern blue gradients
-- **Secondary**: Complementary purple tones
-- **Accent**: Warm orange for highlights
-- **Neutral**: Sophisticated grays for text and backgrounds
-- **Success/Error**: Semantic colors for feedback
-
-#### Typography
-- **Headings**: Clean, modern sans-serif
-- **Body**: Readable font optimized for extended reading
-- **Code**: Monospace for technical content
-- **Sizes**: Responsive typography scale
-
-#### Components
-- **Cards**: Consistent padding and shadows
-- **Forms**: Clear labels and validation states
-- **Navigation**: Intuitive iconography
-- **Feedback**: Toast notifications and progress indicators
-
-### 📖 User Guide Outline
-
-#### Getting Started
-1. **Account Setup**: Registration and profile creation
-2. **Canvas Connection**: LMS integration walkthrough
-3. **First Document**: Upload and processing guide
-4. **Learning Assessment**: Initial style evaluation
-
-#### Core Features
-1. **Document Library**: Organization and management
-2. **Active Recall**: Study session walkthrough
-3. **Feynman Mode**: Teaching simulation guide
-4. **Flashcards**: Spaced repetition system
-5. **Progress Tracking**: Understanding your data
-
-#### Advanced Usage
-1. **Study Strategies**: Optimal learning approaches
-2. **Time Management**: Using assignment tracking
-3. **Concept Mastery**: Progress monitoring
-4. **Customization**: Personalizing your experience
-
-### 🔍 Testing and Validation
-
-#### Current Status
-- **Application Startup**: ✅ Running successfully
-- **Database Connection**: ✅ PostgreSQL configured
-- **Authentication Flow**: ✅ Replit Auth working
-- **File Processing**: ✅ Multi-format document support
-- **AI Integration**: ⏳ Awaiting OpenAI API key
-
-#### Validation Checklist
-- [ ] Complete user registration flow
-- [ ] Canvas OAuth integration
-- [ ] Document upload and processing
-- [ ] AI question generation
-- [ ] Flashcard creation and review
-- [ ] Learning assessment completion
-- [ ] Chat interface functionality
-- [ ] Progress tracking accuracy
+### **Developer Documentation**
+- **API Documentation**: Complete API reference
+- **Architecture Guide**: System design and patterns
+- **Deployment Guide**: Platform-specific deployment instructions
+- **Contributing Guide**: Development setup and guidelines
 
 ---
 
-## Summary
-
-Mobius represents a comprehensive AI-powered learning platform that successfully integrates multiple educational technologies into a cohesive, user-friendly experience. The current implementation provides a solid foundation with all core features operational, with the OpenAI API key now activated for full AI-powered learning features.
-
-The platform is designed for scalability, maintainability, and user engagement, with a clear roadmap for future enhancements. The technical architecture supports both current needs and future growth, while the user experience prioritizes intuitive interaction and effective learning outcomes.
-
-**Last Updated**: June 20, 2025  
-**Version**: 1.0.0  
-**Status**: Production Ready
+**StudyMentor** - Empowering students with AI-powered learning tools for better academic success.

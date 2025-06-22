@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
 import { storage } from "./storage";
-import { setupSimpleAuth, isAuthenticated } from "./simpleAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { canvasService } from "./services/canvas";
 import { openaiService } from "./services/openai";
 import { documentProcessor } from "./services/documentProcessor";
@@ -75,7 +75,7 @@ const interleavedSessionSchema = z.object({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupSimpleAuth(app);
+  await setupAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

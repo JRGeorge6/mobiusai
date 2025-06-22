@@ -1,9 +1,16 @@
 import React from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, BookOpen, Zap, Target, Users, TrendingUp, RotateCcw } from "lucide-react";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
+
+  const handleGetStarted = () => {
+    setLocation('/login');
+  };
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -14,9 +21,9 @@ export default function Landing() {
               <div className="w-10 h-10 bg-coral rounded-xl flex items-center justify-center">
                 <Brain className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-neutral-800">Mobius</h1>
+              <h1 className="text-2xl font-bold text-neutral-800">StudyMentor</h1>
             </div>
-            <Button onClick={() => window.location.href = '/api/login'} className="btn-coral">
+            <Button onClick={handleGetStarted} className="btn-coral">
               Get Started
             </Button>
           </div>
@@ -36,7 +43,7 @@ export default function Landing() {
           <Button
             size="lg"
             className="btn-coral text-lg px-8 py-4 rounded-xl"
-            onClick={() => window.location.href = '/api/login'}
+            onClick={handleGetStarted}
           >
             Get Started Free
           </Button>
@@ -142,7 +149,7 @@ export default function Landing() {
             <Button
               size="lg"
               className="btn-lime text-lg px-8 py-4 rounded-xl"
-              onClick={() => window.location.href = '/api/login'}
+              onClick={handleGetStarted}
             >
               Connect Canvas Now
             </Button>
@@ -158,7 +165,7 @@ export default function Landing() {
               <div className="w-8 h-8 bg-coral rounded-lg flex items-center justify-center">
                 <Brain className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-semibold text-neutral-800">Mobius</span>
+              <span className="text-lg font-semibold text-neutral-800">StudyMentor</span>
             </div>
             <div className="flex space-x-6 text-sm text-neutral-600">
               <a href="#" className="hover:text-neutral-800 transition-colors">About</a>

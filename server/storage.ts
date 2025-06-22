@@ -102,19 +102,58 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
+  async upsertUser(userData: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    profileImageUrl?: string;
+    authProvider?: string;
+    authProviderId?: string;
+    passwordHash?: string;
+  }) {
+    return await db.insert(users).values(userData)
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          ...userData,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          profileImageUrl: userData.profileImageUrl,
+          authProvider: userData.authProvider,
+          authProviderId: userData.authProviderId,
+          passwordHash: userData.passwordHash,
           updatedAt: new Date(),
         },
       })
       .returning();
+  }
+
+  async getUserById(id: string) {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
+  }
+
+  async getUserByEmail(email: string) {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async updateCanvasTokens(
+    userId: string,
+    accessToken: string,
+    refreshToken: string,
+    expiresAt: Date
+  ) {
+    return await db.update(users)
+      .set({
+        canvasAccessToken: accessToken,
+        canvasRefreshToken: refreshToken,
+        canvasTokenExpiry: expiresAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
   }
 
   // Course operations
@@ -125,17 +164,6 @@ export class DatabaseStorage implements IStorage {
   async createCourse(course: InsertCourse): Promise<Course> {
     const [newCourse] = await db.insert(courses).values(course).returning();
     return newCourse;
-  }
-
-  async updateCanvasTokens(userId: string, accessToken: string, refreshToken: string, expiresAt: Date): Promise<void> {
-    await db.update(users)
-      .set({
-        canvasAccessToken: accessToken,
-        canvasRefreshToken: refreshToken,
-        canvasTokenExpiry: expiresAt,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId));
   }
 
   // Assignment operations
