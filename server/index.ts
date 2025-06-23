@@ -126,6 +126,29 @@ app.get('/health', (req, res) => {
   try {
     const server = await registerRoutes(app);
 
+    // Setup Vite in development or serve static files in production
+    if (isDevelopment()) {
+      // Only import vite in development to avoid bundling issues
+      const { setupVite } = await import("./vite.js");
+      await setupVite(app, server);
+    } else {
+      // Production static file serving
+      const distPath = path.resolve(getDirname(), "public");
+      
+      if (!fs.existsSync(distPath)) {
+        throw new Error(
+          `Could not find the build directory: ${distPath}, make sure to build the client first`,
+        );
+      }
+      
+      app.use(express.static(distPath));
+      // SPA fallback for non-API routes.
+      // Any request that doesn't match an API route or a static file will be sent the index.html page.
+      app.get(/^(?!\/api).*/, (_req: any, res: any) => {
+        res.sendFile(path.resolve(distPath, "index.html"));
+      });
+    }
+
     // Global error handling middleware
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err.status || err.statusCode || 500;
@@ -152,31 +175,10 @@ app.get('/health', (req, res) => {
       });
     });
 
-    // 404 handler
-    app.use((req, res) => {
-      res.status(404).json({ message: "Not Found" });
+    // 404 handler for any remaining API routes
+    app.use('/api/*', (req, res) => {
+      res.status(404).json({ message: `API Route not found: ${req.method} ${req.originalUrl}` });
     });
-
-    // Setup Vite in development
-    if (isDevelopment()) {
-      // Only import vite in development to avoid bundling issues
-      const { setupVite } = await import("./vite.js");
-      await setupVite(app, server);
-    } else {
-      // Production static file serving
-      const distPath = path.resolve(getDirname(), "public");
-      
-      if (!fs.existsSync(distPath)) {
-        throw new Error(
-          `Could not find the build directory: ${distPath}, make sure to build the client first`,
-        );
-      }
-      
-      app.use(express.static(distPath));
-      app.use("*", (_req: any, res: any) => {
-        res.sendFile(path.resolve(distPath, "index.html"));
-      });
-    }
 
     // Start server
     const port = config.PORT;

@@ -69,7 +69,7 @@ export default function Chat() {
       message: inputMessage,
       mode,
       courseId: selectedCourse,
-      sessionId,
+      sessionId: sessionId ?? undefined,
     });
 
     setInputMessage("");
