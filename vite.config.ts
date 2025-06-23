@@ -15,6 +15,7 @@ export default defineConfig(async () => {
     server: {
       port: 5000,
       host: true,
+      allowedHosts: ['all'],
     },
     build: {
       outDir: "../dist/public",
