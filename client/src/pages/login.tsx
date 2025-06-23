@@ -26,7 +26,7 @@ export default function LoginPage() {
   });
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { login, demoLogin, getCsrfToken } = useAuth();
+  const { login, demoLogin } = useAuth();
 
   // Fetch available auth providers on component mount
   React.useEffect(() => {
@@ -53,12 +53,12 @@ export default function LoginPage() {
         toast({ title: "Welcome!", description: "You're now logged in as a demo user." });
         setLocation('/dashboard');
       } else {
-        throw new Error('Demo login failed');
+        throw new Error(result.error || 'Demo login failed');
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Login Failed",
-        description: "Unable to log in with demo account. Please try again.",
+        description: error.message || "Unable to log in with demo account. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -21,6 +21,11 @@ interface AuthState {
   error: string | null;
 }
 
+interface AuthResult {
+  success: boolean;
+  error?: string;
+}
+
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -84,48 +89,60 @@ export function useAuth() {
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     setAuthState(prev => ({ ...prev, error: null, isLoading: true }));
     try {
       const response = await apiRequest("POST", "/api/auth/login", { email, password });
       const data = await response.json();
       if (response.ok) {
         await checkAuthStatus();
+        return { success: true };
       } else {
         setAuthState(prev => ({ ...prev, error: data.message || "Login failed", isLoading: false }));
+        return { success: false, error: data.message || "Login failed" };
       }
     } catch (error: any) {
-      setAuthState(prev => ({ ...prev, error: error.message || "An unexpected error occurred.", isLoading: false }));
+      const errorMessage = error.message || "An unexpected error occurred.";
+      setAuthState(prev => ({ ...prev, error: errorMessage, isLoading: false }));
+      return { success: false, error: errorMessage };
     }
   };
 
-  const register = async (email: string, password: string, firstName: string, lastName: string) => {
+  const register = async (email: string, password: string, firstName: string, lastName: string): Promise<AuthResult> => {
     setAuthState(prev => ({ ...prev, error: null, isLoading: true }));
     try {
       const response = await apiRequest("POST", "/api/auth/register", { email, password, firstName, lastName });
       const data = await response.json();
       if (response.ok) {
         await checkAuthStatus();
+        return { success: true };
       } else {
         setAuthState(prev => ({ ...prev, error: data.message || "Registration failed", isLoading: false }));
+        return { success: false, error: data.message || "Registration failed" };
       }
     } catch (error: any) {
-      setAuthState(prev => ({ ...prev, error: error.message || "An unexpected error occurred.", isLoading: false }));
+      const errorMessage = error.message || "An unexpected error occurred.";
+      setAuthState(prev => ({ ...prev, error: errorMessage, isLoading: false }));
+      return { success: false, error: errorMessage };
     }
   };
 
-  const demoLogin = async () => {
+  const demoLogin = async (): Promise<AuthResult> => {
     setAuthState(prev => ({ ...prev, error: null, isLoading: true }));
     try {
       const response = await apiRequest("POST", "/api/auth/demo");
        if (response.ok) {
         await checkAuthStatus();
+        return { success: true };
       } else {
         const data = await response.json();
         setAuthState(prev => ({ ...prev, error: data.message || "Demo login failed", isLoading: false }));
+        return { success: false, error: data.message || "Demo login failed" };
       }
     } catch (error: any) {
-      setAuthState(prev => ({ ...prev, error: error.message || "An unexpected error occurred.", isLoading: false }));
+      const errorMessage = error.message || "An unexpected error occurred.";
+      setAuthState(prev => ({ ...prev, error: errorMessage, isLoading: false }));
+      return { success: false, error: errorMessage };
     }
   };
 

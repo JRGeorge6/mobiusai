@@ -667,22 +667,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Question not found" });
       }
 
-      // Verify user owns the session
+      if (!question.sessionId) {
+        return res.status(400).json({ message: "Question is not part of a session" });
+      }
+
       const session = await storage.getInterleavedSessionById(question.sessionId);
-      if (!session || session.userId !== userId) {
-        return res.status(403).json({ message: "Access denied" });
+      if (!session || session.userId !== req.user.id) {
+        return res.status(404).json({ message: "Session not found" });
       }
 
       // Check if answer is correct
       const isCorrect = await openaiService.checkAnswer(question.question, question.answer, answer);
-
-      // Update question with user's answer
+      
+      // Assume time spent is sent from client, or calculate it here
       await storage.updateInterleavedQuestionAnswer(questionId, answer, isCorrect, timeSpent);
-
-      // Update session progress
       await storage.updateInterleavedSessionProgress(question.sessionId);
 
-      res.json({ isCorrect, correctAnswer: question.answer });
+      res.json({
+        isCorrect,
+        correctAnswer: question.answer,
+      });
     } catch (error) {
       console.error("Error submitting answer:", error);
       res.status(500).json({ message: "Failed to submit answer" });

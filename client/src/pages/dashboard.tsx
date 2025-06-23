@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,12 +16,16 @@ import {
   Upload,
   CheckCircle,
   Target,
-  Calendar
+  Calendar,
+  ArrowRight
 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Assignment, Course, Flashcard, LearningAssessment } from "shared/schema";
 
 export default function Dashboard() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const queryClient = useQueryClient();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -38,24 +42,20 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: courses = [] } = useQuery({
+  const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
-    enabled: isAuthenticated,
   });
 
-  const { data: upcomingAssignments = [] } = useQuery({
-    queryKey: ["/api/assignments", { upcoming: true }],
-    enabled: isAuthenticated,
+  const { data: upcomingAssignments = [] } = useQuery<Assignment[]>({
+    queryKey: ["/api/assignments", { upcoming: true, limit: 3 }],
   });
 
-  const { data: latestAssessment } = useQuery({
-    queryKey: ["/api/assessment/latest"],
-    enabled: isAuthenticated,
-  });
-
-  const { data: dueFlashcards = [] } = useQuery({
+  const { data: dueFlashcards = [] } = useQuery<Flashcard[]>({
     queryKey: ["/api/flashcards", { due: true }],
-    enabled: isAuthenticated,
+  });
+
+  const { data: latestAssessment } = useQuery<LearningAssessment>({
+    queryKey: ["/api/assessments", { latest: true }],
   });
 
   if (isLoading) {
@@ -67,157 +67,132 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
-      {/* Dashboard Overview */}
-      <section className="mb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Upcoming Assignments */}
-          <div className="lg:col-span-2">
-            <Card className="glassmorphic hover-lift border-0">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-xl font-semibold text-neutral-800">
-                  Upcoming Assignments
-                </CardTitle>
-                <Badge variant="outline" className="bg-white/50">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  From Canvas
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                {upcomingAssignments.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Calendar className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-                    <p className="text-neutral-600">No upcoming assignments</p>
-                    <p className="text-sm text-neutral-500 mt-2">
-                      Connect your Canvas account to see assignments
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {upcomingAssignments.slice(0, 3).map((assignment: any) => (
-                      <AssignmentCard key={assignment.id} assignment={assignment} />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-neutral-800">
+          Welcome back, {user?.firstName || 'Student'}!
+        </h1>
+        <p className="text-neutral-600">Here's your learning snapshot for today.</p>
+      </div>
 
-          {/* Quick Actions */}
-          <div className="space-y-6">
-            {/* Learning Style Assessment */}
-            <Card className="glassmorphic hover-lift border-0">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-neutral-800">
-                  Learning Style
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {latestAssessment ? (
-                  <div>
-                    <RadarChart assessment={latestAssessment} size={200} />
-                    <div className="text-center mt-4">
-                      <p className="text-sm text-neutral-600 mb-3">Your learning style profile</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.location.href = '/assessment'}
-                        className="w-full"
-                      >
-                        Retake Assessment
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <Target className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                    <p className="text-sm text-neutral-600 mb-4">
-                      Take our learning style assessment to get personalized study recommendations
-                    </p>
-                    <Button
-                      onClick={() => window.location.href = '/assessment'}
-                      className="btn-coral w-full"
-                    >
-                      Take Assessment
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Upcoming Assignments */}
+        <Card className="glassmorphic border-0">
+          <CardHeader>
+            <CardTitle>Upcoming Assignments</CardTitle>
+            <CardDescription>
+              Due in the next 7 days
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {upcomingAssignments.length === 0 ? (
+                <p className="text-neutral-600">No upcoming assignments.</p>
+              ) : (
+                upcomingAssignments.map((assignment) => (
+                  <AssignmentCard key={assignment.id} assignment={assignment} />
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Quick Study */}
-            <Card className="glassmorphic hover-lift border-0">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-neutral-800">
-                  Quick Study
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-white/50 hover:bg-white/70"
-                    onClick={() => window.location.href = '/chat?mode=active_recall'}
-                  >
-                    <Brain className="w-4 h-4 mr-3 text-coral" />
-                    Active Recall
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-white/50 hover:bg-white/70"
-                    onClick={() => window.location.href = '/chat?mode=feynman'}
-                  >
-                    <Users className="w-4 h-4 mr-3 text-blue-500" />
-                    Feynman Mode
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-white/50 hover:bg-white/70"
-                    onClick={() => window.location.href = '/flashcards'}
-                  >
-                    <BookOpen className="w-4 h-4 mr-3 text-purple-500" />
-                    Flashcards ({dueFlashcards.length} due)
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+        {/* Learning Style */}
+        <Card className="glassmorphic border-0">
+          <CardHeader>
+            <CardTitle>Your Learning Style</CardTitle>
+            <CardDescription>
+              Based on your latest assessment
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center">
+            {latestAssessment ? (
+              <RadarChart assessment={latestAssessment} size={200} />
+            ) : (
+              <div className="text-center">
+                <p className="text-neutral-600 mb-4">No assessment data found.</p>
+                <Button
+                  variant="outline"
+                  className="bg-white/50 hover:bg-white/70"
+                  onClick={() => window.location.href = '/assessment'}
+                >
+                  Take Assessment
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Course Library */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-neutral-800">Course Library</h2>
-          <Button className="btn-coral">
-            <Upload className="w-4 h-4 mr-2" />
-            Upload Materials
-          </Button>
-        </div>
-        
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <Card className="glassmorphic border-0 hover-lift">
+          <CardHeader>
+            <CardTitle>AI Study Assistant</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-neutral-600 mb-4">
+              Chat with our AI to test your knowledge or explain concepts back.
+            </p>
+            <Button 
+              className="w-full btn-coral"
+              onClick={() => window.location.href = '/chat'}
+            >
+              Start AI Chat
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="glassmorphic border-0 hover-lift">
+          <CardHeader>
+            <CardTitle>Flashcard Review</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-neutral-600 mb-4">
+              You have {dueFlashcards.length} flashcards due for review.
+            </p>
+            <Button 
+              className="w-full btn-lime"
+              onClick={() => window.location.href = '/flashcards'}
+            >
+              Review Flashcards
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Courses */}
+      <div>
+        <h2 className="text-2xl font-bold text-neutral-800 mb-4">My Courses</h2>
         {courses.length === 0 ? (
           <Card className="glassmorphic border-0">
             <CardContent className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-neutral-800 mb-2">No courses found</h3>
-              <p className="text-neutral-600 mb-6">
-                Connect your Canvas account to automatically sync your courses
+              <p className="text-neutral-600 mb-4">
+                You haven't added any courses yet.
               </p>
-              <Button className="btn-lime">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Connect Canvas
+              <Button 
+                className="btn-coral"
+                onClick={() => window.location.href = '/library'}
+              >
+                Upload Study Materials
               </Button>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map((course: any) => (
-              <CourseCard key={course.id} course={course} />
+              <CourseCard 
+                key={course.id} 
+                course={course}
+                documentCount={course.documentCount || 0}
+                conceptCount={course.conceptCount || 0}
+                progressPercentage={course.progressPercentage || 0}
+              />
             ))}
           </div>
         )}
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }

@@ -1,25 +1,48 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, FileText, Calculator, Microscope } from "lucide-react";
+import { Assignment } from "shared/schema";
 
 interface AssignmentCardProps {
-  assignment: {
-    id: number;
-    name: string;
-    dueDate: string;
-    pointsPossible?: string;
-    course?: {
-      courseCode: string;
-      name: string;
-    };
-    submissionTypes?: string[];
-  };
+  assignment: Assignment & { course?: { courseCode: string; name: string } };
 }
 
 export default function AssignmentCard({ assignment }: AssignmentCardProps) {
+  if (!assignment.dueDate) {
+    // Handle case where there is no due date
+    return (
+      <Card className="bg-white/30 hover:bg-white/40 transition-colors border-0 hover-lift">
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-white/50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <FileText className="w-6 h-6 text-neutral-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-neutral-800 truncate">
+                {assignment.name}
+              </h3>
+              <p className="text-sm text-neutral-600 truncate">
+                {assignment.course?.courseCode} - {assignment.course?.name}
+              </p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <Badge className="bg-neutral-100 text-neutral-800 border-0">
+                No Due Date
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const getDaysUntilDue = () => {
+    if (!assignment.dueDate) return Infinity;
     const dueDate = new Date(assignment.dueDate);
     const today = new Date();
+    // Reset time to compare dates only
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
     const diffTime = dueDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
@@ -52,6 +75,7 @@ export default function AssignmentCard({ assignment }: AssignmentCardProps) {
   };
 
   const formatDueDate = () => {
+    if (!assignment.dueDate) return "";
     const dueDate = new Date(assignment.dueDate);
     return dueDate.toLocaleDateString('en-US', {
       month: 'short',

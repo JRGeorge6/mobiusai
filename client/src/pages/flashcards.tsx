@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { BookOpen, RotateCcw, CheckCircle, Clock, X } from "lucide-react";
+import { Flashcard } from "shared/schema";
 
 export default function Flashcards() {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -15,7 +16,7 @@ export default function Flashcards() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: dueFlashcards = [] } = useQuery({
+  const { data: dueFlashcards = [] } = useQuery<Flashcard[]>({
     queryKey: ["/api/flashcards", { due: true }],
   });
 

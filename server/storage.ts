@@ -112,21 +112,12 @@ export class DatabaseStorage implements IStorage {
     authProviderId?: string;
     passwordHash?: string;
   }) {
-    return await db.insert(users).values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
-          authProvider: userData.authProvider,
-          authProviderId: userData.authProviderId,
-          passwordHash: userData.passwordHash,
-          updatedAt: new Date(),
-        },
-      })
+    const result = await db
+      .insert(users)
+      .values({ ...userData, updatedAt: new Date() })
+      .onConflictDoUpdate({ target: users.id, set: { ...userData, updatedAt: new Date() } })
       .returning();
+    return result[0];
   }
 
   async getUserById(id: string) {
@@ -144,16 +135,16 @@ export class DatabaseStorage implements IStorage {
     accessToken: string,
     refreshToken: string,
     expiresAt: Date
-  ) {
-    return await db.update(users)
+  ): Promise<void> {
+    await db
+      .update(users)
       .set({
         canvasAccessToken: accessToken,
         canvasRefreshToken: refreshToken,
         canvasTokenExpiry: expiresAt,
         updatedAt: new Date(),
       })
-      .where(eq(users.id, userId))
-      .returning();
+      .where(eq(users.id, userId));
   }
 
   // Course operations
@@ -190,7 +181,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAssignment(assignment: InsertAssignment): Promise<Assignment> {
-    const [newAssignment] = await db.insert(assignments).values(assignment).returning();
+    const values = {
+      ...assignment,
+      submissionTypes: Array.isArray(assignment.submissionTypes)
+        ? assignment.submissionTypes
+        : assignment.submissionTypes ? [assignment.submissionTypes] : [],
+    };
+    const [newAssignment] = await db.insert(assignments).values(values).returning();
     return newAssignment;
   }
 
@@ -210,7 +207,13 @@ export class DatabaseStorage implements IStorage {
 
   // Concept operations
   async createConcept(concept: InsertConcept): Promise<Concept> {
-    const [newConcept] = await db.insert(concepts).values(concept).returning();
+    const values = {
+      ...concept,
+      tags: Array.isArray(concept.tags) 
+        ? concept.tags 
+        : concept.tags ? [concept.tags] : [],
+    };
+    const [newConcept] = await db.insert(concepts).values(values).returning();
     return newConcept;
   }
 
@@ -243,7 +246,13 @@ export class DatabaseStorage implements IStorage {
 
   // Flashcard operations
   async createFlashcard(flashcard: InsertFlashcard): Promise<Flashcard> {
-    const [newFlashcard] = await db.insert(flashcards).values(flashcard).returning();
+    const values = {
+      ...flashcard,
+      tags: Array.isArray(flashcard.tags)
+        ? flashcard.tags
+        : flashcard.tags ? [flashcard.tags] : [],
+    };
+    const [newFlashcard] = await db.insert(flashcards).values(values).returning();
     return newFlashcard;
   }
 

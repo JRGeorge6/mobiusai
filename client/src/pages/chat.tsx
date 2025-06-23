@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Brain, Users, Send, MessageCircle } from "lucide-react";
+import { Course } from "shared/schema";
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -24,7 +25,7 @@ export default function Chat() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: courses = [] } = useQuery({
+  const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
@@ -148,7 +149,7 @@ export default function Chat() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">All courses</SelectItem>
-                  {courses.map((course: any) => (
+                  {courses.map((course) => (
                     <SelectItem key={course.id} value={course.id.toString()}>
                       {course.courseCode} - {course.name}
                     </SelectItem>

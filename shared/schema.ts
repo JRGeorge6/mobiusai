@@ -325,7 +325,9 @@ export const insertCourseSchema = createInsertSchema(courses).omit({
   updatedAt: true,
 });
 
-export const insertAssignmentSchema = createInsertSchema(assignments).omit({
+export const insertAssignmentSchema = createInsertSchema(assignments, {
+  submissionTypes: z.array(z.string()).optional(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -336,7 +338,9 @@ export const insertDocumentSchema = createInsertSchema(documents).omit({
   createdAt: true,
 });
 
-export const insertConceptSchema = createInsertSchema(concepts).omit({
+export const insertConceptSchema = createInsertSchema(concepts, {
+  tags: z.array(z.string()).optional(),
+}).omit({
   id: true,
   createdAt: true,
 });
@@ -347,13 +351,17 @@ export const insertConceptProgressSchema = createInsertSchema(conceptProgress).o
   updatedAt: true,
 });
 
-export const insertFlashcardSchema = createInsertSchema(flashcards).omit({
+export const insertFlashcardSchema = createInsertSchema(flashcards, {
+  tags: z.array(z.string()).optional(),
+}).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertLearningAssessmentSchema = createInsertSchema(learningAssessments).omit({
+export const insertLearningAssessmentSchema = createInsertSchema(
+  learningAssessments
+).omit({
   id: true,
   completedAt: true,
 });
@@ -364,13 +372,17 @@ export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({
   updatedAt: true,
 });
 
-export const insertInterleavedSessionSchema = createInsertSchema(interleavedSessions).omit({
+export const insertInterleavedSessionSchema = createInsertSchema(
+  interleavedSessions
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertInterleavedQuestionSchema = createInsertSchema(interleavedQuestions).omit({
+export const insertInterleavedQuestionSchema = createInsertSchema(
+  interleavedQuestions
+).omit({
   id: true,
   createdAt: true,
 });
@@ -391,10 +403,16 @@ export type InsertConceptProgress = z.infer<typeof insertConceptProgressSchema>;
 export type Flashcard = typeof flashcards.$inferSelect;
 export type InsertFlashcard = z.infer<typeof insertFlashcardSchema>;
 export type LearningAssessment = typeof learningAssessments.$inferSelect;
-export type InsertLearningAssessment = z.infer<typeof insertLearningAssessmentSchema>;
+export type InsertLearningAssessment = z.infer<
+  typeof insertLearningAssessmentSchema
+>;
 export type ChatSession = typeof chatSessions.$inferSelect;
 export type InsertChatSession = z.infer<typeof insertChatSessionSchema>;
 export type InterleavedSession = typeof interleavedSessions.$inferSelect;
-export type InsertInterleavedSession = z.infer<typeof insertInterleavedSessionSchema>;
+export type InsertInterleavedSession = z.infer<
+  typeof insertInterleavedSessionSchema
+>;
 export type InterleavedQuestion = typeof interleavedQuestions.$inferSelect;
-export type InsertInterleavedQuestion = z.infer<typeof insertInterleavedQuestionSchema>;
+export type InsertInterleavedQuestion = z.infer<
+  typeof insertInterleavedQuestionSchema
+>;

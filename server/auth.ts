@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import csurf from "csurf";
 import { storage } from "./storage";
 import { config } from "./config";
+import { nanoid } from "nanoid";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,7 +36,7 @@ export async function setupAuth(app: Express) {
   app.use(csurf({ cookie: false }));
 
   // CSRF token endpoint
-  app.get('/api/auth/csrf', (req, res) => {
+  app.get('/api/csrf-token', (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
   });
 
@@ -50,10 +51,10 @@ export async function setupAuth(app: Express) {
   });
 
   // Demo login for development
-  app.get('/api/auth/demo', async (req, res) => {
+  app.post('/api/auth/demo', async (req, res) => {
     try {
       // Create or get demo user
-      const [demoUser] = await storage.upsertUser({
+      const demoUser = await storage.upsertUser({
         id: 'demo-user-123',
         email: 'demo@studymentor.app',
         firstName: 'Demo',
@@ -63,7 +64,7 @@ export async function setupAuth(app: Express) {
 
       // Set user in session
       (req.session as any).user = demoUser;
-      res.redirect('/dashboard');
+      res.json({ success: true, user: demoUser });
     } catch (error) {
       console.error('Demo login error:', error);
       res.status(500).json({ message: 'Demo login failed' });
@@ -71,7 +72,7 @@ export async function setupAuth(app: Express) {
   });
 
   // Local registration
-  app.post('/api/auth/local/register', async (req, res) => {
+  app.post('/api/auth/register', async (req, res) => {
     try {
       const { email, password, firstName, lastName } = req.body;
       if (!email || !password) {
@@ -88,8 +89,8 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ message: 'Email already registered' });
       }
       const passwordHash = await bcrypt.hash(password, 10);
-      const [newUser] = await storage.upsertUser({
-        id: `user-${Date.now()}`,
+      const newUser = await storage.upsertUser({
+        id: `user_${nanoid()}`,
         email,
         firstName,
         lastName,
@@ -105,7 +106,7 @@ export async function setupAuth(app: Express) {
   });
 
   // Local login (email + password)
-  app.post('/api/auth/local/login', async (req, res) => {
+  app.post('/api/auth/login', async (req, res) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) {
@@ -131,9 +132,13 @@ export async function setupAuth(app: Express) {
   });
 
   // Logout route
-  app.get('/api/auth/logout', (req, res) => {
-    req.session.destroy(() => {
-      res.redirect('/');
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: 'Logout failed' });
+      }
+      res.clearCookie('connect.sid'); // Or your session cookie name
+      res.json({ success: true, message: 'Logged out successfully' });
     });
   });
 

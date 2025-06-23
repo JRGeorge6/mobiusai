@@ -23,68 +23,68 @@ import { AnimatePresence, motion } from "framer-motion";
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 5,
   },
   in: {
     opacity: 1,
-    y: 0,
   },
   out: {
     opacity: 0,
-    y: -5,
   },
 };
 
 const pageTransition = {
   type: "tween",
-  ease: "anticipate",
-  duration: 0.3,
+  ease: "easeInOut",
+  duration: 0.4,
 };
 
-const AnimatedRoute = ({ component: Component }) => (
-  <motion.div
-    initial="initial"
-    animate="in"
-    exit="out"
-    variants={pageVariants}
-    transition={pageTransition}
-  >
-    <Component />
-  </motion.div>
-);
+const AnimatedRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
+  const [location] = useLocation();
 
-const AuthenticatedRoutes = () => (
-  <>
-    <Navigation />
-    <main className="flex-1">
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/library" component={Library} />
-        <Route path="/chat" component={Chat} />
-        <Route path="/flashcards" component={Flashcards} />
-        <Route path="/assessment" component={Assessment} />
-        <Route path="/interleaved" component={Interleaved} />
-        <Route path="/interleaved/:sessionId" component={InterleavedSession} />
-        <Route component={NotFound} />
-      </Switch>
-    </main>
-    <Footer />
-  </>
-);
-
-const UnauthenticatedRoutes = () => (
-  <Switch>
-    <Route path="/" component={Landing} />
-    <Route path="/login" component={Login} />
-    <Route path="/register" component={Register} />
-    <Route component={Login} /> {/* Default to login for unknown routes */}
-  </Switch>
-);
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location}
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="flex-1 flex flex-col"
+      >
+        {isAuthenticated ? (
+          <>
+            <Navigation />
+            <main className="flex-1">
+              <Switch>
+                <Route path="/" component={Dashboard} />
+                <Route path="/dashboard" component={Dashboard} />
+                <Route path="/library" component={Library} />
+                <Route path="/chat" component={Chat} />
+                <Route path="/flashcards" component={Flashcards} />
+                <Route path="/assessment" component={Assessment} />
+                <Route path="/interleaved" component={Interleaved} />
+                <Route path="/interleaved/:sessionId" component={InterleavedSession} />
+                <Route component={NotFound} />
+              </Switch>
+            </main>
+            <Footer />
+          </>
+        ) : (
+          <Switch>
+            <Route path="/" component={Landing} />
+            <Route path="/login" component={Login} />
+            <Route path="/register" component={Register} />
+            <Route component={Login} />
+          </Switch>
+        )}
+      </motion.div>
+    </AnimatePresence>
+  );
+};
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
-  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -99,17 +99,7 @@ function Router() {
 
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={isAuthenticated ? "authed" : "unauthed"}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {isAuthenticated ? <AuthenticatedRoutes /> : <UnauthenticatedRoutes />}
-        </motion.div>
-      </AnimatePresence>
+      <AnimatedRoutes isAuthenticated={isAuthenticated} />
     </div>
   );
 }
@@ -125,4 +115,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

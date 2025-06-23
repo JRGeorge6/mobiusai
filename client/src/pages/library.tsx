@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Upload, FileText, BookOpen, Search, Filter } from "lucide-react";
+import { Course, Document } from "shared/schema";
 
 export default function Library() {
   const [selectedCourse, setSelectedCourse] = useState<string>("");
@@ -15,11 +16,11 @@ export default function Library() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: courses = [] } = useQuery({
+  const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
-  const { data: documents = [] } = useQuery({
+  const { data: documents = [] } = useQuery<Document[]>({
     queryKey: ["/api/documents", selectedCourse ? { courseId: selectedCourse } : {}],
   });
 
@@ -78,9 +79,14 @@ export default function Library() {
     uploadMutation.mutate(formData);
   };
 
-  const filteredDocuments = documents.filter((doc: any) =>
-    doc.originalName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDocuments = documents.filter((doc) => {
+    const course = courses.find((c) => c.id === doc.courseId);
+    const searchTermMatch = doc.originalName.toLowerCase().includes(searchTerm.toLowerCase());
+    if (selectedCourse && doc.courseId !== parseInt(selectedCourse)) {
+      return false;
+    }
+    return searchTermMatch;
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-20">
