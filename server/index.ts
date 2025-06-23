@@ -4,6 +4,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import { 
   config, 
   getAllowedOrigins, 
@@ -158,13 +159,11 @@ app.get('/health', (req, res) => {
 
     // Setup Vite in development
     if (isDevelopment()) {
-      const viteModule = await import("./vite");
-      const setupVite = viteModule.setupVite;
+      // Only import vite in development to avoid bundling issues
+      const { setupVite } = await import("./vite.js");
       await setupVite(app, server);
     } else {
       // Production static file serving
-      const path = await import("path");
-      const fs = await import("fs");
       const distPath = path.resolve(getDirname(), "public");
       
       if (!fs.existsSync(distPath)) {
