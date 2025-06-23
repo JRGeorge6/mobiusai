@@ -12,7 +12,9 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
   
-  return session({
+  // Use memory store for development, but in production we should use a proper store
+  // For now, we'll use memory store but with better configuration
+  const sessionConfig: any = {
     secret: config.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -24,8 +26,22 @@ export function getSession() {
       maxAge: sessionTtl,
       // 'lax' is correct for same-origin, 'none' only for cross-site
       sameSite: config.NODE_ENV === 'production' ? 'lax' : 'lax',
+      // Ensure cookie is set for the root path
+      path: '/',
+      // Don't set domain in production to let the browser handle it
+      domain: config.NODE_ENV === 'production' ? undefined : undefined,
     },
-  });
+    name: 'sid', // Use a shorter cookie name
+  };
+
+  // In production, we should use a proper session store like Redis or PostgreSQL
+  // For now, we'll use memory store but with better error handling
+  if (config.NODE_ENV === 'production') {
+    console.log('⚠️  Using memory session store in production - sessions will be lost on restart');
+    console.log('💡 Consider using Redis or PostgreSQL session store for production');
+  }
+
+  return session(sessionConfig);
 }
 
 export async function setupAuth(app: Express) {
@@ -35,11 +51,48 @@ export async function setupAuth(app: Express) {
   app.use(getSession());
 
   // CSRF protection for all POST/PUT/DELETE routes (except /api/auth/csrf)
-  app.use(csurf({ cookie: false }));
+  app.use(csurf({ 
+    cookie: false,
+    ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
+    // Add better error handling for CSRF
+    value: (req) => {
+      return req.headers['x-csrf-token'] as string;
+    }
+  }));
 
-  // CSRF token endpoint
+  // CSRF token endpoint - add better error handling
   app.get('/api/csrf-token', (req, res) => {
-    res.json({ csrfToken: req.csrfToken() });
+    try {
+      const token = req.csrfToken();
+      res.json({ csrfToken: token });
+    } catch (error) {
+      console.error('CSRF token generation error:', error);
+      res.status(500).json({ message: 'Failed to generate CSRF token' });
+    }
+  });
+
+  // Auth status endpoint
+  app.get('/api/auth/status', (req, res) => {
+    const user = (req.session as any).user;
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(401).json({ message: 'Not authenticated' });
+    }
+  });
+
+  // Debug endpoint for troubleshooting
+  app.get('/api/auth/debug', (req, res) => {
+    res.json({
+      sessionID: req.sessionID,
+      hasSession: !!req.session,
+      hasUser: !!(req.session as any).user,
+      user: (req.session as any).user,
+      cookies: req.headers.cookie,
+      userAgent: req.headers['user-agent'],
+      origin: req.headers.origin,
+      host: req.headers.host,
+    });
   });
 
   // Auth routes
@@ -55,6 +108,8 @@ export async function setupAuth(app: Express) {
   // Demo login for development
   app.post('/api/auth/demo', async (req, res) => {
     try {
+      console.log('Demo login attempt - session ID:', req.sessionID);
+      
       // Create or get demo user
       const demoUser = await storage.upsertUser({
         id: 'demo-user-123',
@@ -66,7 +121,17 @@ export async function setupAuth(app: Express) {
 
       // Set user in session
       (req.session as any).user = demoUser;
-      res.json({ success: true, user: demoUser });
+      
+      // Force session save
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session save failed' });
+        }
+        
+        console.log('Demo login successful - user set in session');
+        res.json({ success: true, user: demoUser });
+      });
     } catch (error) {
       console.error('Demo login error:', error);
       res.status(500).json({ message: 'Demo login failed' });
@@ -100,7 +165,17 @@ export async function setupAuth(app: Express) {
         authProvider: 'local'
       });
       (req.session as any).user = newUser;
-      res.json({ success: true, user: newUser });
+      
+      // Force session save
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session save failed' });
+        }
+        
+        console.log('Registration successful - user set in session');
+        res.json({ success: true, user: newUser });
+      });
     } catch (error) {
       console.error('Registration error:', error);
       res.status(500).json({ message: 'Registration failed' });
@@ -126,7 +201,17 @@ export async function setupAuth(app: Express) {
         return res.status(400).json({ message: 'Invalid email or password' });
       }
       (req.session as any).user = user;
-      res.json({ success: true, user });
+      
+      // Force session save
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session save failed' });
+        }
+        
+        console.log('Login successful - user set in session');
+        res.json({ success: true, user });
+      });
     } catch (error) {
       console.error('Local login error:', error);
       res.status(500).json({ message: 'Login failed' });
