@@ -1,5 +1,11 @@
 # MobiusAI Deployment Guide
 
+## ⚠️ Render Production Cookie & CSRF Settings
+
+- **ALLOWED_ORIGINS** and **BASE_URL** must be set to your Render domain (e.g., `https://your-app.onrender.com`) in your Render environment variables.
+- **Session Cookie**: The app is configured to use `secure: true` and `sameSite: 'lax'` in production, which is correct for Render if your frontend and backend are on the same domain.
+- **CSRF**: The frontend fetches `/api/csrf-token` and sends it with all mutating requests. No extra config needed if the above is set.
+
 ## Overview
 
 MobiusAI is a full-stack application with:

@@ -19,9 +19,11 @@ export function getSession() {
     rolling: true,
     cookie: {
       httpOnly: true,
+      // On Render (production), always secure cookies
       secure: config.NODE_ENV === 'production',
       maxAge: sessionTtl,
-      sameSite: 'lax'
+      // 'lax' is correct for same-origin, 'none' only for cross-site
+      sameSite: config.NODE_ENV === 'production' ? 'lax' : 'lax',
     },
   });
 }
