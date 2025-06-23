@@ -104,7 +104,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-gray-900">
-            Welcome to StudyMentor
+            Welcome to MobiusAI
           </CardTitle>
           <CardDescription className="text-gray-600">
             Your AI-powered study assistant

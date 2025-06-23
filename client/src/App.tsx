@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -35,18 +35,41 @@ const pageVariants = {
 const pageTransition = {
   type: "tween",
   ease: "easeInOut",
-  duration: 0.4,
+  duration: 0.3,
+};
+
+// Custom hook to handle navigation with immediate fade
+const useNavigationWithFade = () => {
+  const [location, setLocation] = useLocation();
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [pendingLocation, setPendingLocation] = useState<string | null>(null);
+
+  const navigateWithFade = (newLocation: string) => {
+    if (newLocation === location) return;
+    
+    setIsNavigating(true);
+    setPendingLocation(newLocation);
+    
+    // Start fade out immediately
+    setTimeout(() => {
+      setLocation(newLocation);
+      setIsNavigating(false);
+      setPendingLocation(null);
+    }, 150); // Half of the transition duration
+  };
+
+  return { location, navigateWithFade, isNavigating };
 };
 
 const AnimatedRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
-  const [location] = useLocation();
+  const { location, navigateWithFade, isNavigating } = useNavigationWithFade();
 
   return (
     <AnimatePresence mode="wait">
       <motion.div
         key={location}
         initial="initial"
-        animate="in"
+        animate={isNavigating ? "out" : "in"}
         exit="out"
         variants={pageVariants}
         transition={pageTransition}
@@ -54,7 +77,7 @@ const AnimatedRoutes = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
       >
         {isAuthenticated ? (
           <>
-            <Navigation />
+            <Navigation onNavigate={navigateWithFade} />
             <main className="flex-1">
               <Switch>
                 <Route path="/" component={Dashboard} />

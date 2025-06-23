@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# StudyMentor Railway Deployment Script
-echo "🚀 Deploying StudyMentor to Railway..."
+# MobiusAI Railway Deployment Script
+echo "🚀 Deploying MobiusAI to Railway..."
 
 # Check if Railway CLI is installed
 if ! command -v railway &> /dev/null; then

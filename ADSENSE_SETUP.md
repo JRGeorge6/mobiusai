@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide will help you set up Google AdSense on your StudyMentor website with non-intrusive ads placed at the bottom of the page.
+This guide will help you set up Google AdSense on your MobiusAI website with non-intrusive ads placed at the bottom of the page.
 
 ## Prerequisites
 

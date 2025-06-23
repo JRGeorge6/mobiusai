@@ -1,8 +1,8 @@
-# Security Documentation
+# MobiusAI Security Documentation
 
 ## Overview
 
-StudyMentor is an AI-powered study assistant with comprehensive security measures to protect user data and prevent common web vulnerabilities.
+MobiusAI is an AI-powered study assistant with comprehensive security measures to protect user data and prevent common web vulnerabilities.
 
 ## Security Features
 
@@ -142,7 +142,7 @@ app.get('/api/protected', isAuthenticated, (req, res) => {
 
 ### Required Variables
 ```bash
-DATABASE_URL=postgresql://username:password@localhost:5432/studymentor
+DATABASE_URL=postgresql://username:password@localhost:5432/mobiusai
 OPENAI_API_KEY=your-openai-api-key
 SESSION_SECRET=your-super-secret-session-key-min-32-chars
 COOKIE_SECRET=your-cookie-secret-min-32-chars

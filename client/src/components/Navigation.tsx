@@ -18,18 +18,30 @@ import {
   LogOut
 } from "lucide-react";
 
-export default function Navigation() {
+interface NavigationProps {
+  onNavigate?: (path: string) => void;
+}
+
+export default function Navigation({ onNavigate }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
     await logout();
-    setLocation('/');
+    if (onNavigate) {
+      onNavigate('/');
+    } else {
+      setLocation('/');
+    }
   };
 
   const handleNavigation = (path: string) => {
-    setLocation(path);
+    if (onNavigate) {
+      onNavigate(path);
+    } else {
+      setLocation(path);
+    }
     setMobileMenuOpen(false);
   };
 

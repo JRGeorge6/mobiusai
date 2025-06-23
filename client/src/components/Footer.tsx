@@ -2,6 +2,7 @@ import React from 'react';
 import AdBanner from './AdBanner';
 import { getAdSlot } from '@/config/adsense';
 import { useAuth } from '@/hooks/useAuth';
+import { Brain } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -14,7 +15,7 @@ const Footer: React.FC = () => {
           {/* Company info */}
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              StudyMentor
+              MobiusAI
             </h3>
             <p className="text-gray-600 text-sm mb-4">
               Your AI-powered study assistant for effective learning through active recall, 
@@ -72,8 +73,14 @@ const Footer: React.FC = () => {
         {/* Copyright */}
         <div className="mt-8 pt-8 border-t border-gray-200">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-gray-500">
-              © 2024 StudyMentor. All rights reserved.
+            <div className="flex items-center space-x-3 mb-4 md:mb-0">
+              <div className="w-8 h-8 bg-coral rounded-lg flex items-center justify-center">
+                <Brain className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-lg font-semibold text-neutral-800">MobiusAI</span>
+            </div>
+            <p className="text-sm text-neutral-600">
+              © 2024 MobiusAI. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <span className="text-xs text-gray-400">

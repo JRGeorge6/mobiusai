@@ -1,30 +1,12 @@
 @echo off
-echo 🌐 Deploying StudyMentor to Render (FREE)...
-
-REM Check if user has git repository
-if not exist ".git" (
-    echo ❌ Git repository not found. Please initialize git first:
-    echo    git init
-    echo    git add .
-    echo    git commit -m "Initial commit"
-    pause
-    exit /b 1
-)
-
-REM Check if user has remote repository
-git remote get-url origin >nul 2>&1
-if errorlevel 1 (
-    echo ❌ No remote repository found. Please add your GitHub repository:
-    echo    git remote add origin https://github.com/yourusername/StudyMentor.git
-    echo    git push -u origin main
-    pause
-    exit /b 1
-)
-
-echo ✅ Git repository ready!
-
+echo 🌐 Deploying MobiusAI to Render (FREE)...
 echo.
-echo 🚀 Render Deployment Instructions:
+echo 📋 Prerequisites:
+echo 1. Git repository initialized
+echo 2. GitHub remote added
+echo 3. Render account (free)
+echo.
+echo 🚀 Deployment Steps:
 echo.
 echo 1. Go to https://render.com
 echo 2. Sign up with GitHub (NO CREDIT CARD REQUIRED)
@@ -32,19 +14,19 @@ echo 3. Click 'New +' → 'Web Service'
 echo 4. Connect your GitHub repository
 echo 5. Configure the service:
 echo.
-echo    Name: StudyMentor
+echo    Name: MobiusAI
 echo    Environment: Node
-echo    Build Command: npm install ^&^& npm run build
+echo    Build Command: npm install && npm run build
 echo    Start Command: npm start
 echo    Plan: Free
 echo.
 echo 6. Add PostgreSQL Database:
 echo    - Click 'New +' → 'PostgreSQL'
-echo    - Name: studymentor-db
+echo    - Name: mobiusai-db
 echo    - Plan: Free
 echo    - Copy the connection string
 echo.
-echo 7. Set Environment Variables in your Web Service:
+echo 7. Set Environment Variables:
 echo    DATABASE_URL=postgresql://... (from step 6)
 echo    NODE_ENV=production
 echo    SESSION_SECRET=your-super-secret-session-key-min-32-chars

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# StudyMentor Render Deployment Script (Completely FREE)
-echo "🌐 Deploying StudyMentor to Render (FREE)..."
+# MobiusAI Render Deployment Script (Completely FREE)
+echo "🌐 Deploying MobiusAI to Render (FREE)..."
 
 # Check if user has git repository
 if [ ! -d ".git" ]; then
@@ -15,7 +15,7 @@ fi
 # Check if user has remote repository
 if ! git remote get-url origin &> /dev/null; then
     echo "❌ No remote repository found. Please add your GitHub repository:"
-    echo "   git remote add origin https://github.com/yourusername/StudyMentor.git"
+    echo "   git remote add origin https://github.com/yourusername/MobiusAI.git"
     echo "   git push -u origin main"
     exit 1
 fi
@@ -31,7 +31,7 @@ echo "
 4. Connect your GitHub repository
 5. Configure the service:
 
-   Name: StudyMentor
+   Name: MobiusAI
    Environment: Node
    Build Command: npm install && npm run build
    Start Command: npm start
@@ -39,7 +39,7 @@ echo "
 
 6. Add PostgreSQL Database:
    - Click 'New +' → 'PostgreSQL'
-   - Name: studymentor-db
+   - Name: mobiusai-db
    - Plan: Free
    - Copy the connection string
 

@@ -73,7 +73,7 @@ export default function RegisterPage() {
             Create Your Account
           </CardTitle>
           <CardDescription className="text-gray-600">
-            Sign up to start using StudyMentor
+            Sign up to start using MobiusAI
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

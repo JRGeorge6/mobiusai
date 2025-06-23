@@ -113,7 +113,7 @@ export async function setupAuth(app: Express) {
       // Create or get demo user
       const demoUser = await storage.upsertUser({
         id: 'demo-user-123',
-        email: 'demo@studymentor.app',
+        email: 'demo@mobiusai.app',
         firstName: 'Demo',
         lastName: 'User',
         authProvider: 'demo'

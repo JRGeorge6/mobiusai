@@ -1,5 +1,45 @@
 @echo off
-echo 🚀 Deploying StudyMentor to Railway...
+echo 🚀 Deploying MobiusAI to Railway...
+echo.
+echo 📋 Prerequisites:
+echo 1. Railway CLI installed (npm install -g @railway/cli)
+echo 2. Railway account (free tier available)
+echo 3. Git repository with code
+echo.
+echo 🚀 Deployment Steps:
+echo.
+echo 1. Install Railway CLI:
+echo    npm install -g @railway/cli
+echo.
+echo 2. Login to Railway:
+echo    railway login
+echo.
+echo 3. Initialize project:
+echo    railway init
+echo.
+echo 4. Add PostgreSQL database:
+echo    railway add
+echo    # Select PostgreSQL
+echo.
+echo 5. Set environment variables:
+echo    railway variables set DATABASE_URL=${{Postgres.DATABASE_URL}}
+echo    railway variables set NODE_ENV=production
+echo    railway variables set SESSION_SECRET=your-super-secret-session-key-min-32-chars
+echo    railway variables set COOKIE_SECRET=your-cookie-secret-min-32-chars
+echo    railway variables set OPENAI_API_KEY=your-openai-api-key
+echo    railway variables set CANVAS_CLIENT_ID=your-canvas-client-id (optional)
+echo    railway variables set CANVAS_CLIENT_SECRET=your-canvas-client-secret (optional)
+echo    railway variables set CANVAS_REDIRECT_URI=https://your-domain.railway.app/api/canvas/callback
+echo    railway variables set BASE_URL=https://your-domain.railway.app
+echo.
+echo 6. Deploy:
+echo    railway up
+echo.
+echo Your app will be deployed to: https://your-domain.railway.app
+echo.
+echo ✅ Railway offers a free tier with $5/month credit!
+echo.
+pause
 
 REM Check if Railway CLI is installed
 railway --version >nul 2>&1
